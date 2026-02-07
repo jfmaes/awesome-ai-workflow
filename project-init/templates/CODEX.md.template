@@ -1,7 +1,9 @@
-# CLAUDE.md
+# AGENTS.md (Codex Project Instructions)
 
-> Project rules for AI-assisted development. Auto-loaded by Claude Code.
-> KEEP UNDER 100 LINES. Operational learnings go in AGENTS.md.
+> Project rules for AI-assisted development. Auto-loaded by OpenAI Codex.
+> KEEP UNDER 100 LINES. Operational learnings go in OPS.md.
+> NOTE: This file is named AGENTS.md because that's what Codex reads.
+> Claude users use CLAUDE.md instead.
 
 ## Project
 
@@ -74,7 +76,7 @@ Override phrases: "just do it" → T0, "let's plan" → T2+, "Ralph it" → T3 w
 
 - Specs: `specs/*.md`
 - Plan: `IMPLEMENTATION_PLAN.md`
-- Operational guide: `AGENTS.md`
+- Operational guide: `OPS.md`
 - Loop: `./loop.sh <build|plan|plan-work|reflect>`
 - Logs: `logs/` (raw JSONL + human-readable via ralph_stream_parser.py)
 - Cross-project learnings: `~/AI_RETRO.md`

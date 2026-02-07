@@ -2,6 +2,8 @@
 
 A practical system for working with AI coding assistants (Claude Code, OpenAI Codex, Claude.ai) across the full spectrum of tasks — from quick fixes to autonomous build loops.
 
+**Now with full OpenAI Codex support!** The system auto-detects your CLI and adapts file naming and loop infrastructure accordingly.
+
 Built on principles from the [Ralph Playbook](https://claytonfarr.github.io/ralph-playbook/), [Cursor Memory Bank](https://github.com/vanzan01/cursor-memory-bank), and [Addy Osmani's LLM coding workflow](https://addyosmani.com/blog/ai-coding-workflow/).
 
 ---
@@ -175,9 +177,10 @@ and plan are approved. Want me to start the spec?"
 
 ```
 project/
-├── loop.sh                         # Ralph loop orchestrator
-├── CLAUDE.md                       # Project rules (auto-loaded by Claude Code)
-├── AGENTS.md                       # Operational guide (grows through iteration)
+├── loop.sh                         # Ralph loop orchestrator (multi-CLI support)
+├── ralph_stream_parser.py          # Stream parser for human-readable loop output
+├── CLAUDE.md / AGENTS.md           # Project rules (Claude uses CLAUDE.md, Codex uses AGENTS.md)
+├── AGENTS.md / OPS.md              # Operational guide (Claude uses AGENTS.md, Codex uses OPS.md)
 ├── IMPLEMENTATION_PLAN.md          # Task list (generated, updated by loops)
 ├── REFLECTION.md                   # Post-session reflections
 ├── prompts/
@@ -188,8 +191,17 @@ project/
 ├── specs/
 │   ├── _TEMPLATE.md               # Spec template
 │   └── [topic].md                  # One per JTBD topic of concern
+├── logs/                           # Loop execution logs (gitignored)
 └── src/                            # Application code
 ```
+
+**CLI-aware file naming:**
+| Purpose | Claude Code | OpenAI Codex |
+|---------|-------------|--------------|
+| Project instructions | `CLAUDE.md` | `AGENTS.md` |
+| Operational guide | `AGENTS.md` | `OPS.md` |
+
+The `loop.sh` script auto-detects which CLI you have installed and uses the appropriate files.
 
 ### Cross-Project Files (live in your home directory)
 
@@ -205,8 +217,8 @@ project/
 Every Ralph iteration loads fixed context before doing real work. Keep this lean:
 
 ```
-CLAUDE.md              ~2K tokens   (project rules, <100 lines)
-AGENTS.md              ~1.5K tokens (operational guide, <60 lines)
+CLAUDE.md / AGENTS.md  ~2K tokens   (project rules, <100 lines)
+AGENTS.md / OPS.md     ~1.5K tokens (operational guide, <60 lines)
 AI_RETRO.md (partial)  ~0.5K tokens (Rules + one Stack section only)
 specs/*                ~2-5K tokens (varies — keep specs focused)
 IMPLEMENTATION_PLAN.md ~1-3K tokens (shrinks as tasks complete)
@@ -238,11 +250,11 @@ AI_RETRO.md uses **selective loading** to stay bounded:
 │  │  Claude.ai   │    │  Claude Code  │    │    Codex     │      │
 │  │  (thinking)  │    │  (building)   │    │  (building)  │      │
 │  ├──────────────┤    ├──────────────┤    ├──────────────┤      │
-│  │ • Ideation   │    │ • T0–T3 work │    │ • T0–T2 work │      │
-│  │ • Research   │    │ • Ralph loops │    │ • Fast iter  │      │
-│  │ • Retros     │    │ • Spec/Plan  │    │ • Prototypes │      │
-│  │ • Planning   │    │ • Reflection │    │ • Cost-sens  │      │
-│  │   discussions│    │              │    │   iteration  │      │
+│  │ • Ideation   │    │ • T0–T3 work │    │ • T0–T3 work │      │
+│  │ • Research   │    │ • Ralph loops │    │ • Ralph loops│      │
+│  │ • Retros     │    │ • Spec/Plan  │    │ • Spec/Plan  │      │
+│  │ • Planning   │    │ • Reflection │    │ • Reflection │      │
+│  │   discussions│    │              │    │              │      │
 │  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘      │
 │         │                   │                   │               │
 │         ▼                   ▼                   ▼               │
@@ -304,16 +316,33 @@ AI_RETRO.md uses **selective loading** to stay bounded:
 
 ### New Project Setup
 
+**Option 1: Use the project-init skill (recommended)**
+
+In Claude Code, run:
+```
+/project-init
+```
+
+The skill will interview you about your project and generate all files automatically, including:
+- Correct file naming for your CLI (Claude or Codex)
+- Populated CLAUDE.md/AGENTS.md or AGENTS.md/OPS.md
+- Project-specific specs and plan
+- Executable loop.sh
+
+**Option 2: Manual setup**
+
 ```bash
 # 1. Copy the kit into your project
-cp -r ~/ralph-starter-kit/{CLAUDE.md,AGENTS.md,loop.sh,prompts,specs,IMPLEMENTATION_PLAN.md} /path/to/project/
+cp -r ~/ralph-starter-kit/{CLAUDE.md,AGENTS.md,loop.sh,ralph_stream_parser.py,prompts,specs,IMPLEMENTATION_PLAN.md} /path/to/project/
 cd /path/to/project/
 
-# 2. Initialize — paste INIT_PROMPT.md into Claude Code
-#    Answer the interview → Claude populates CLAUDE.md, AGENTS.md, specs/*
+# 2. If using Codex, rename files:
+#    CLAUDE.md → (delete)
+#    AGENTS.md → OPS.md
+#    Then create AGENTS.md from project-init/templates/CODEX.md.template
 
-# 3. Make loop executable
-chmod +x loop.sh
+# 3. Make scripts executable
+chmod +x loop.sh ralph_stream_parser.py
 ```
 
 ### Day-to-Day Usage
@@ -333,8 +362,8 @@ chmod +x loop.sh
 ### Commands
 
 ```bash
-./loop.sh                           # Build mode, unlimited (Ctrl+C to stop)
-./loop.sh 20                        # Build mode, max 20 iterations
+./loop.sh build                     # Build mode, unlimited (Ctrl+C to stop)
+./loop.sh build 20                  # Build mode, max 20 iterations
 ./loop.sh plan                      # Planning mode (gap analysis → task list)
 ./loop.sh plan 5                    # Planning mode, max 5 iterations
 ./loop.sh plan-work "feature desc"  # Scoped plan for feature branch
@@ -344,10 +373,17 @@ chmod +x loop.sh
 ### Environment Variables
 
 ```bash
-RALPH_MODEL=sonnet ./loop.sh        # Sonnet for speed/cost
-RALPH_MODEL=opus ./loop.sh plan     # Opus for planning (default)
+RALPH_CLI=claude ./loop.sh          # Force Claude Code (auto-detected by default)
+RALPH_CLI=codex ./loop.sh           # Force OpenAI Codex
+RALPH_MODEL=sonnet ./loop.sh        # Sonnet for speed/cost (Claude)
+RALPH_MODEL=opus ./loop.sh plan     # Opus for planning (Claude, default)
+RALPH_MODEL=codex ./loop.sh         # Codex model (OpenAI, default)
 RALPH_PROMPTS_DIR=prompts ./loop.sh # Custom prompt directory
 ```
+
+The loop auto-detects which CLI you have installed (`claude` or `codex`) and uses appropriate model defaults:
+- **Claude Code**: `sonnet` for build, `opus` for plan/reflect
+- **OpenAI Codex**: `codex` for all modes
 
 ### Feature Branch Workflow
 
@@ -463,7 +499,13 @@ Keep under 60 lines. Loaded every iteration — bloat here is expensive.
 No. Most work is T0–T2 and doesn't need a loop. Ralph is for T3 batch execution with 10+ tasks from a solid plan.
 
 **What about Codex?**
-The spec/plan/tier system works identically. loop.sh is Claude Code specific, but you can work through plans interactively in Codex. Templates are model-agnostic.
+Full Codex support is built-in! The system auto-detects your CLI and adapts:
+- Files are named appropriately (AGENTS.md for project instructions, OPS.md for operational guide)
+- `loop.sh` auto-detects and uses the `codex` CLI with `--yolo` mode
+- Stream parser works with both Claude's stream-json and Codex's JSON events
+- All templates and prompts are model-agnostic
+
+Just install the Codex CLI and run `./loop.sh` — it works identically to Claude Code.
 
 **How do I handle multi-session work without Ralph?**
 End-of-session: ask the LLM to summarize state, decisions, and next steps as a handoff note. Paste it at the start of the next session.

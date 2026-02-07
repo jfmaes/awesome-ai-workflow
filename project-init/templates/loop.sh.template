@@ -1,33 +1,71 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 # =============================================================================
-# Ralph Loop — Enhanced with plan-work and reflect modes
+# Ralph Loop — Multi-CLI support (Claude Code + OpenAI Codex)
 # =============================================================================
 # Usage:
-#   ./loop.sh                              # Build mode, unlimited iterations
-#   ./loop.sh 20                           # Build mode, max 20 iterations
+#   ./loop.sh build                        # Build mode, unlimited iterations
+#   ./loop.sh build 20                     # Build mode, max 20 iterations
 #   ./loop.sh plan                         # Plan mode, unlimited
 #   ./loop.sh plan 5                       # Plan mode, max 5 iterations
 #   ./loop.sh plan-work "description"      # Scoped plan for feature branch
 #   ./loop.sh plan-work "description" 5    # Scoped plan, max 5 iterations
 #   ./loop.sh reflect                      # Reflection mode (run after build session)
+#
+# Environment variables:
+#   RALPH_CLI=claude|codex                 # Force CLI (auto-detected if unset)
+#   RALPH_MODEL=<model>                    # Override model for all modes
+#   RALPH_PROMPTS_DIR=<dir>               # Override prompts directory (default: prompts)
 # =============================================================================
 
 # --- Configuration ---
-# Override these via environment variables if needed
-CLAUDE_MODEL="${RALPH_MODEL:-opus}"          # opus for planning/complex, sonnet for speed
-PROMPTS_DIR="${RALPH_PROMPTS_DIR:-prompts}"  # directory containing prompt files
+RALPH_CLI="${RALPH_CLI:-}"
+PROMPTS_DIR="${RALPH_PROMPTS_DIR:-prompts}"
+LOG_DIR="logs"
+
+# --- CLI detection ---
+if [ -z "$RALPH_CLI" ]; then
+    if command -v claude &>/dev/null; then
+        RALPH_CLI="claude"
+    elif command -v codex &>/dev/null; then
+        RALPH_CLI="codex"
+    else
+        echo "Error: Neither 'claude' nor 'codex' CLI found in PATH"
+        echo "Install one of:"
+        echo "  Claude Code: https://docs.anthropic.com/en/docs/claude-code"
+        echo "  Codex CLI:   npm install -g @openai/codex"
+        exit 1
+    fi
+fi
+
+# --- Model defaults per CLI ---
+# Claude: sonnet (fast build), opus (deep planning/reflection)
+# Codex:  codex (default for all modes)
+cli_model_build() {
+    if [ "$RALPH_CLI" = "claude" ]; then echo "sonnet"; else echo "codex"; fi
+}
+cli_model_plan() {
+    if [ "$RALPH_CLI" = "claude" ]; then echo "opus"; else echo "codex"; fi
+}
 
 # --- Parse arguments ---
-MODE="build"
-PROMPT_FILE="${PROMPTS_DIR}/PROMPT_build.md"
+MODE=""
+PROMPT_FILE=""
 MAX_ITERATIONS=0
 WORK_SCOPE=""
+CLI_MODEL=""
 
 case "${1:-}" in
+    build)
+        MODE="build"
+        CLI_MODEL="${RALPH_MODEL:-$(cli_model_build)}"
+        PROMPT_FILE="${PROMPTS_DIR}/PROMPT_build.md"
+        MAX_ITERATIONS=${2:-0}
+        ;;
     plan)
         MODE="plan"
+        CLI_MODEL="${RALPH_MODEL:-$(cli_model_plan)}"
         PROMPT_FILE="${PROMPTS_DIR}/PROMPT_plan.md"
         MAX_ITERATIONS=${2:-0}
         ;;
@@ -38,24 +76,30 @@ case "${1:-}" in
             exit 1
         fi
         MODE="plan-work"
+        CLI_MODEL="${RALPH_MODEL:-$(cli_model_plan)}"
         WORK_SCOPE="$2"
         PROMPT_FILE="${PROMPTS_DIR}/PROMPT_plan_work.md"
         MAX_ITERATIONS=${3:-5}
         ;;
     reflect)
         MODE="reflect"
+        CLI_MODEL="${RALPH_MODEL:-$(cli_model_plan)}"
         PROMPT_FILE="${PROMPTS_DIR}/PROMPT_reflect.md"
         MAX_ITERATIONS=1  # Reflect is typically one pass
         ;;
-    [0-9]*)
-        MAX_ITERATIONS=$1
-        ;;
-    "")
-        # defaults already set
-        ;;
     *)
-        echo "Unknown mode: $1"
-        echo "Usage: ./loop.sh [plan|plan-work|reflect] [max_iterations]"
+        echo "Usage: ./loop.sh <mode> [options]"
+        echo ""
+        echo "Modes:"
+        echo "  build [max_iterations]              Build mode (implements tasks from plan)"
+        echo "  plan [max_iterations]               Plan mode (creates/updates implementation plan)"
+        echo "  plan-work \"description\" [max_iter]   Scoped plan for a specific feature"
+        echo "  reflect                             Reflection mode (run after build session)"
+        echo ""
+        echo "Environment variables:"
+        echo "  RALPH_CLI=claude|codex              Force CLI (auto-detected if unset)"
+        echo "  RALPH_MODEL=<model>                 Override model (claude: sonnet/opus, codex: codex)"
+        echo "  RALPH_PROMPTS_DIR=<dir>             Override prompts directory (default: prompts)"
         exit 1
         ;;
 esac
@@ -76,18 +120,25 @@ else
     EFFECTIVE_PROMPT=$(cat "$PROMPT_FILE")
 fi
 
+# --- Ensure log directory exists ---
+mkdir -p "$LOG_DIR"
+
 # --- Display config ---
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "not-a-git-repo")
+HAS_REMOTE=$(git remote 2>/dev/null | head -1)
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔄 Ralph Loop"
+echo "Ralph Loop"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  CLI:    $RALPH_CLI"
 echo "  Mode:   $MODE"
 echo "  Prompt: $PROMPT_FILE"
-echo "  Model:  $CLAUDE_MODEL"
+echo "  Model:  $CLI_MODEL"
 echo "  Branch: $CURRENT_BRANCH"
+echo "  Remote: ${HAS_REMOTE:-none}"
 [ $MAX_ITERATIONS -gt 0 ] && echo "  Max:    $MAX_ITERATIONS iterations"
 [ -n "$WORK_SCOPE" ] && echo "  Scope:  $WORK_SCOPE"
+echo "  Logs:   $LOG_DIR/"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
@@ -99,50 +150,96 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
+# --- CLI execution functions ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+run_claude() {
+    local prompt="$1"
+    local model="$2"
+    local log_file="$3"
+
+    echo "$prompt" | claude -p \
+        --dangerously-skip-permissions \
+        --model "$model" \
+        --output-format stream-json \
+        --verbose \
+        2>&1 | tee "${log_file}.jsonl" | python3 -u "${SCRIPT_DIR}/ralph_stream_parser.py"
+}
+
+run_codex() {
+    local prompt="$1"
+    local model="$2"
+    local log_file="$3"
+
+    codex exec \
+        --yolo \
+        --model "$model" \
+        --json \
+        "$prompt" \
+        2>&1 | tee "${log_file}.jsonl" | python3 -u "${SCRIPT_DIR}/ralph_stream_parser.py"
+}
+
 # --- Main loop ---
 ITERATION=0
 
 while true; do
     if [ $MAX_ITERATIONS -gt 0 ] && [ $ITERATION -ge $MAX_ITERATIONS ]; then
         echo ""
-        echo "━━━ Reached max iterations: $MAX_ITERATIONS ━━━"
+        echo "--- Reached max iterations: $MAX_ITERATIONS ---"
         break
     fi
 
     ITERATION=$((ITERATION + 1))
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    LOG_FILE="${LOG_DIR}/ralph_${MODE}_${TIMESTAMP}_iter${ITERATION}.log"
+
     echo ""
     echo "======================== ITERATION $ITERATION ========================"
+    echo "  Started: $(date)"
+    echo "  Log:     $LOG_FILE"
     echo ""
 
-    # Run Claude with the prompt
-    # -p: headless mode (non-interactive, reads from stdin)
-    # --dangerously-skip-permissions: auto-approve all tool calls
-    # --model: select model (opus for planning/complex, sonnet for speed)
-    # --verbose: detailed logging
-    echo "$EFFECTIVE_PROMPT" | claude -p \
-        --dangerously-skip-permissions \
-        --model "$CLAUDE_MODEL" \
-        --verbose
+    # Run the selected CLI
+    if [ "$RALPH_CLI" = "claude" ]; then
+        run_claude "$EFFECTIVE_PROMPT" "$CLI_MODEL" "$LOG_FILE"
+    elif [ "$RALPH_CLI" = "codex" ]; then
+        run_codex "$EFFECTIVE_PROMPT" "$CLI_MODEL" "$LOG_FILE"
+    else
+        echo "Error: Unknown CLI '$RALPH_CLI' (expected 'claude' or 'codex')"
+        exit 1
+    fi
 
-    # Push changes after each iteration (build/plan-work modes)
-    if [ "$MODE" = "build" ] || [ "$MODE" = "plan-work" ]; then
-        git push origin "$CURRENT_BRANCH" 2>/dev/null || {
+    CLI_EXIT=${PIPESTATUS[0]:-0}
+
+    if [ "$CLI_EXIT" -ne 0 ] 2>/dev/null; then
+        echo ""
+        echo "*** $RALPH_CLI exited with code $CLI_EXIT ***"
+        echo "Check log: ${LOG_FILE}.jsonl"
+        echo "Continuing to next iteration..."
+    fi
+
+    # Push changes after each iteration (build/plan-work modes) — only if remote exists
+    if [ -n "$HAS_REMOTE" ] && { [ "$MODE" = "build" ] || [ "$MODE" = "plan-work" ]; }; then
+        echo ""
+        echo "Pushing changes..."
+        git push origin "$CURRENT_BRANCH" 2>&1 || {
             echo "Push failed. Creating remote branch..."
-            git push -u origin "$CURRENT_BRANCH" 2>/dev/null || echo "Warning: push failed (may not be a git repo)"
+            git push -u origin "$CURRENT_BRANCH" 2>&1 || echo "Warning: push failed"
         }
     fi
 
     echo ""
-    echo "━━━ Iteration $ITERATION complete ━━━"
+    echo "--- Iteration $ITERATION complete ($(date)) ---"
 done
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🏁 Loop finished after $ITERATION iteration(s)"
+echo "Loop finished after $ITERATION iteration(s)"
+echo "Logs: $LOG_DIR/"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # --- Post-loop suggestion ---
 if [ "$MODE" = "build" ] && [ $ITERATION -gt 3 ]; then
     echo ""
-    echo "💡 Tip: Run './loop.sh reflect' to capture learnings from this session"
+    echo "Tip: Run './loop.sh reflect' to capture learnings from this session"
 fi

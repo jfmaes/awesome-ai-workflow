@@ -1,0 +1,26 @@
+# OPS.md
+
+> Operational guide. Updated during build loops and interactive sessions.
+> KEEP UNDER 60 LINES. Status/progress belong in IMPLEMENTATION_PLAN.md.
+> Loaded every iteration — bloat here pollutes every future context window.
+> NOTE: Named OPS.md (not AGENTS.md) to avoid collision with Codex project instructions.
+
+## Build & Run
+
+[Populated during init — how to build and run the project]
+
+## Validation
+
+Run after implementing. These are the backpressure mechanisms:
+
+- Tests: `[command]`
+- Typecheck: `[command]`
+- Lint: `[command]`
+
+## Operational Notes
+
+[Populated by Ralph / interactive sessions — learnings about how to work in this codebase]
+
+## Codebase Patterns
+
+[Populated by Ralph / interactive sessions — discovered patterns and gotchas]

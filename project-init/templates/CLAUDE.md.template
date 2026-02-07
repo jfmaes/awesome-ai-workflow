@@ -51,11 +51,12 @@
 - [AI-specific anti-pattern for this codebase]
 - Never leave placeholder/stub implementations — implement completely or don't start
 
-## Git
+## Git (omit section if not a git repo)
 
 - Branch naming: [convention]
 - Commit messages: [convention]
 - Always `git add -A && git commit` after passing tests
+- Never commit failing tests or broken builds
 
 ## Complexity Tiers
 
@@ -74,5 +75,6 @@ Override phrases: "just do it" → T0, "let's plan" → T2+, "Ralph it" → T3 w
 - Specs: `specs/*.md`
 - Plan: `IMPLEMENTATION_PLAN.md`
 - Operational guide: `AGENTS.md`
-- Loop: `./loop.sh [plan|build|plan-work|reflect]`
+- Loop: `./loop.sh <build|plan|plan-work|reflect>`
+- Logs: `logs/` (raw JSONL + human-readable via ralph_stream_parser.py)
 - Cross-project learnings: `~/AI_RETRO.md`
