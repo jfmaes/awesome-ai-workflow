@@ -1,0 +1,29 @@
+# AI_RETRO.md — Cross-Project Learnings
+
+> Location: ~/AI_RETRO.md (outside any repo — shared across all projects)
+> Updated automatically by reflection prompts.
+>
+> SIZE RULES (enforced during reflection):
+>   - Rules:          max 20 lines
+>   - Each Stack:     max 10 lines
+>   - Recent:         max 20 entries (promote or archive when full)
+>
+> LOADING RULES (for build/plan prompts):
+>   - Load ONLY: Rules + the matching Stack section
+>   - Never load Archive into build/plan context
+
+## Rules
+
+[Universal, distilled, proven patterns. One line each.]
+
+## Stack: Python
+
+## Stack: C# / .NET
+
+## Stack: Web / Frontend
+
+## Stack: Infrastructure / Docker
+
+## Recent
+
+[Format: YYYY-MM-DD | project | learning]

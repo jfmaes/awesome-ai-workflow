@@ -1,0 +1,78 @@
+# CLAUDE.md Template
+
+> Project rules for AI-assisted development. Auto-loaded by Claude Code.
+> KEEP UNDER 100 LINES. Operational learnings go in AGENTS.md.
+
+## Project
+
+- **Name:** [PROJECT_NAME]
+- **Description:** [1-2 sentences]
+- **Stack:** [language, framework, key deps]
+
+## Commands
+
+```bash
+# Build
+[command]
+
+# Run
+[command]
+
+# Test (all)
+[command]
+
+# Test (specific)
+[command — e.g., pytest path/to/test.py]
+
+# Lint
+[command]
+
+# Type check (if applicable)
+[command]
+```
+
+## Architecture
+
+- **Source code:** [path]
+- **Tests:** [path]
+- **Shared utilities:** [path — treat as project stdlib]
+- **Config:** [key config files]
+
+## Code Style
+
+- [Convention 1]
+- [Convention 2]
+- [Convention 3]
+- File naming: [convention]
+- Import order: [convention]
+
+## Anti-Patterns (NEVER do these)
+
+- [AI-specific anti-pattern for this codebase]
+- Never leave placeholder/stub implementations — implement completely or don't start
+
+## Git
+
+- Branch naming: [convention]
+- Commit messages: [convention]
+- Always `git add -A && git commit` after passing tests
+
+## Complexity Tiers
+
+Assess every task before starting. State the tier. User can override.
+
+- **T0 (Just do it):** Single file, clear intent, low risk → execute directly
+- **T1 (Think aloud):** 1-3 files, medium scope → state approach, then execute
+- **T2 (Spec & plan):** Multi-file, design decisions → draft spec → approval → plan → build
+- **T3 (Full spec + plan):** Architecture, multi-session → full spec.md + plan.md + approval gates
+
+Signals: files touched, reversibility, domain risk, ambiguity, duration, audience.
+Override phrases: "just do it" → T0, "let's plan" → T2+, "Ralph it" → T3 with loop.
+
+## Ralph Integration (if applicable)
+
+- Specs: `specs/*.md`
+- Plan: `IMPLEMENTATION_PLAN.md`
+- Operational guide: `AGENTS.md`
+- Loop: `./loop.sh [plan|build|plan-work|reflect]`
+- Cross-project learnings: `~/AI_RETRO.md`
