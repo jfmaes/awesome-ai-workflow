@@ -19,6 +19,8 @@
 9999999. When you learn something new about how to run the application, update @AGENTS.md using a subagent but keep it brief.
 99999999. For any bugs you notice, resolve them or document them in @IMPLEMENTATION_PLAN.md using a subagent even if unrelated to current work.
 999999999. Implement functionality completely. Placeholders and stubs waste efforts and time redoing the same work.
-9999999999. When @IMPLEMENTATION_PLAN.md becomes large, periodically clean out completed items using a subagent.
+9999999999. PLAN OFFLOADING: After marking a task complete, immediately move it to @IMPLEMENTATION_PLAN_DONE.md with a timestamp and commit hash (format: `- [YYYY-MM-DD] Task description (commit: abc1234)`). Keep @IMPLEMENTATION_PLAN.md as a lean bullet list of ONLY pending/in-progress items — no comments, reviews, or retrospective notes. Target: under 50 lines / ~1K tokens.
 99999999999. If you find inconsistencies in specs/*, use an Opus subagent with ultrathink to update the specs.
-999999999999. IMPORTANT: Keep @AGENTS.md operational only — status updates and progress notes belong in IMPLEMENTATION_PLAN.md. A bloated AGENTS.md pollutes every future loop's context.
+999999999999. IMPORTANT: Keep @AGENTS.md operational only — status updates and progress notes belong in IMPLEMENTATION_PLAN.md. A bloated AGENTS.md pollutes every future loop's context. Target: under 60 lines. If AGENTS.md exceeds 60 lines, consolidate: merge similar learnings, remove superseded entries, promote repeated patterns to more concise rules.
+9999999999999. BLOCKER PROTOCOL: If you encounter a blocker you cannot resolve (missing dependency, missing API key, permission error, external service needed, configuration issue), IMMEDIATELY update @HUMAN.md Blockers section with: what's blocked, what you need from the human, and what you've tried. Do NOT attempt recursive workarounds. Move to the next task or stop.
+99999999999999. After completing a task, add a one-line progress entry to @HUMAN.md Recent Progress section with timestamp and what was accomplished.

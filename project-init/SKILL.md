@@ -7,7 +7,7 @@ description: "Initialize AI-assisted development projects with adaptive workflow
 
 Bootstrap AI-assisted development projects with adaptive workflow scaffolding.
 
-Produces: project instruction files (CLAUDE.md or AGENTS.md depending on CLI), operational guide, specs/, IMPLEMENTATION_PLAN.md, loop.sh, and prompt files — populated for the specific project through a structured interview.
+Produces: project instruction files (CLAUDE.md or AGENTS.md depending on CLI), operational guide, specs/, IMPLEMENTATION_PLAN.md, HUMAN.md, loop.sh, and prompt files — populated for the specific project through a structured interview.
 
 ## Quick Start
 
@@ -28,6 +28,8 @@ view templates/CLAUDE.md.template
 view templates/CODEX.md.template
 view templates/AGENTS.md.template
 view templates/OPS.md.template
+view templates/HUMAN.md.template
+view templates/IMPLEMENTATION_PLAN_DONE.md.template
 view templates/SPEC_TEMPLATE.md
 view templates/TIER_REFERENCE.md
 ```
@@ -73,6 +75,20 @@ Ask the user these questions **one group at a time**. Wait for answers before pr
 - Known tech debt?
 - Previous AI-generated code needing attention?
 
+**Group 6 — Specifications (T2/T3 only):**
+
+For each JTBD identified in Group 1, if the project is T2 or T3, interview to create a proper spec. Skip this for T0/T1.
+
+For each JTBD, ask:
+1. **One-sentence test:** "Describe this JTBD in one sentence without 'and'." If they use "and", split into multiple specs.
+2. **Context:** Why does this matter? What exists today? What's broken/missing?
+3. **Requirements:** What must work? (Push for testable success criteria — "How would we verify this works?")
+4. **Edge cases:** "What happens when [X fails / input is invalid / resource is exhausted / operations conflict]?" Force at least 3-5 edge cases with expected behavior.
+5. **Acceptance criteria:** For each requirement, derive observable, testable outcomes. If the user can't describe how to test it, probe deeper until it's specific.
+6. **Open questions:** Flag anything unresolved as `OPEN_QUESTION:` rather than guessing.
+
+The goal is **input quality** — testable specs prevent vague plans and wasted loop iterations.
+
 ### Step 3: Study Existing Codebase (if applicable)
 
 If there's existing code:
@@ -81,6 +97,7 @@ If there's existing code:
 3. Identify existing patterns, utilities, conventions
 4. Note inconsistencies or gaps
 5. Check for existing CLAUDE.md, AGENTS.md, or similar — don't overwrite without asking
+6. **Check for existing specs/** — if specs already exist, note their completeness. In Step 5, ask the user whether to preserve existing specs (and only generate missing ones) or regenerate all specs from Group 6 interview
 
 ### Step 4: Assess Complexity Tier
 
@@ -126,15 +143,23 @@ Generate files in the project root using the templates as structure. **Populate 
 
 #### Generate for T2+:
 
-**specs/*.md** — One per JTBD topic of concern.
+**specs/*.md** — One per JTBD topic of concern. **Fully populated from Group 6 interview**, not template placeholders.
 - Use SPEC_TEMPLATE.md structure
-- Include acceptance criteria
-- Flag unknowns as `OPEN_QUESTION:`
+- JTBD must pass the one-sentence test (no "and")
+- Requirements with testable success criteria (from Group 6 interview)
+- 3-5 edge cases with expected behavior (from Group 6 interview)
+- Acceptance criteria that are observable and testable (from Group 6 interview)
+- Flag unknowns as `OPEN_QUESTION:` (anything unresolved from Group 6)
 
 **IMPLEMENTATION_PLAN.md** — Initial gap analysis.
 - Compare specs against existing code
 - Prioritized task list
 - Mark as draft (will be regenerated)
+- Header should note that only pending/in-progress tasks belong here; completed tasks go to IMPLEMENTATION_PLAN_DONE.md
+
+**HUMAN.md** — Communication channel from Ralph to human. Copy from templates/HUMAN.md.template.
+- Blockers section for action-required items
+- Recent Progress section updated during build loops
 
 #### Generate for T3 (if user wants Ralph loop):
 
@@ -155,6 +180,7 @@ Generate files in the project root using the templates as structure. **Populate 
 - PROMPT_plan.md
 - PROMPT_build.md
 - PROMPT_plan_work.md
+- PROMPT_review.md
 - PROMPT_reflect.md
 
 Copy from templates, then customize:
@@ -166,6 +192,7 @@ Copy from templates, then customize:
 **Add to .gitignore** (if git repo):
 ```
 logs/
+.ralph_review_score
 ```
 
 ### Step 6: AI_RETRO.md Setup
@@ -186,12 +213,13 @@ CLI: [Claude Code | OpenAI Codex]
 Files generated:
   ✅ CLAUDE.md or AGENTS.md (XX lines) — project instructions
   ✅ AGENTS.md or OPS.md (XX lines) — operational guide
-  ✅ specs/topic-a.md
-  ✅ specs/topic-b.md
+  ✅ specs/topic-a.md (fully specified with edge cases and acceptance criteria)
+  ✅ specs/topic-b.md (fully specified with edge cases and acceptance criteria)
   ✅ IMPLEMENTATION_PLAN.md (XX tasks)
+  ✅ HUMAN.md — Ralph → human communication channel
   ✅ loop.sh (executable, auto-detects CLI)
   ✅ ralph_stream_parser.py
-  ✅ prompts/ (4 files)
+  ✅ prompts/ (5 files, includes review prompt)
   ✅ ~/AI_RETRO.md (created/updated)
 
 Tier assessment: T[X]

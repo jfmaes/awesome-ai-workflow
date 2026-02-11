@@ -181,12 +181,15 @@ project/
 ├── ralph_stream_parser.py          # Stream parser for human-readable loop output
 ├── CLAUDE.md / AGENTS.md           # Project rules (Claude uses CLAUDE.md, Codex uses AGENTS.md)
 ├── AGENTS.md / OPS.md              # Operational guide (Claude uses AGENTS.md, Codex uses OPS.md)
-├── IMPLEMENTATION_PLAN.md          # Task list (generated, updated by loops)
+├── IMPLEMENTATION_PLAN.md          # Active tasks only (generated, updated by loops)
+├── IMPLEMENTATION_PLAN_DONE.md    # Completed tasks with timestamps (auto-populated)
+├── HUMAN.md                       # Ralph → human communication (blockers + progress)
 ├── REFLECTION.md                   # Post-session reflections
 ├── prompts/
 │   ├── PROMPT_plan.md              # Planning mode prompt
 │   ├── PROMPT_build.md             # Building mode prompt
 │   ├── PROMPT_plan_work.md         # Scoped planning for feature branches
+│   ├── PROMPT_review.md           # Post-build review/quality gate prompt
 │   └── PROMPT_reflect.md           # Reflection mode prompt
 ├── specs/
 │   ├── _TEMPLATE.md               # Spec template
@@ -221,7 +224,7 @@ CLAUDE.md / AGENTS.md  ~2K tokens   (project rules, <100 lines)
 AGENTS.md / OPS.md     ~1.5K tokens (operational guide, <60 lines)
 AI_RETRO.md (partial)  ~0.5K tokens (Rules + one Stack section only)
 specs/*                ~2-5K tokens (varies — keep specs focused)
-IMPLEMENTATION_PLAN.md ~1-3K tokens (shrinks as tasks complete)
+IMPLEMENTATION_PLAN.md ~0.5-1K tokens (stays bounded — completed tasks offloaded to DONE file)
 ────────────────────────────────────
 Fixed overhead:        ~7-12K tokens per iteration
 ```
@@ -318,22 +321,31 @@ AI_RETRO.md uses **selective loading** to stay bounded:
 
 **Option 1: Use the project-init skill (recommended)**
 
-In Claude Code, run:
+The project-init skill works with both Claude Code and OpenAI Codex. It interviews you about your project and generates all files automatically with correct CLI-aware naming.
+
+In **Claude Code**, run:
 ```
 /project-init
 ```
 
-The skill will interview you about your project and generate all files automatically, including:
-- Correct file naming for your CLI (Claude or Codex)
-- Populated CLAUDE.md/AGENTS.md or AGENTS.md/OPS.md
-- Project-specific specs and plan
-- Executable loop.sh
+In **OpenAI Codex**, paste the contents of `project-init/SKILL.md` as your prompt, or reference it in your session:
+```
+codex exec "Follow the instructions in project-init/SKILL.md to initialize this project for AI-assisted development."
+```
+
+The skill generates:
+- Correct file naming for your CLI (`CLAUDE.md` + `AGENTS.md` for Claude, `AGENTS.md` + `OPS.md` for Codex)
+- Populated project instructions and operational guide
+- Project-specific specs and implementation plan
+- `HUMAN.md` communication channel
+- Executable `loop.sh` with review prompt
+- All 5 prompt files (plan, build, plan-work, review, reflect)
 
 **Option 2: Manual setup**
 
 ```bash
 # 1. Copy the kit into your project
-cp -r ~/ralph-starter-kit/{CLAUDE.md,AGENTS.md,loop.sh,ralph_stream_parser.py,prompts,specs,IMPLEMENTATION_PLAN.md} /path/to/project/
+cp -r ~/ralph-starter-kit/{CLAUDE.md,AGENTS.md,loop.sh,ralph_stream_parser.py,prompts,specs,IMPLEMENTATION_PLAN.md,IMPLEMENTATION_PLAN_DONE.md,HUMAN.md,.gitignore} /path/to/project/
 cd /path/to/project/
 
 # 2. If using Codex, rename files:
@@ -347,11 +359,11 @@ chmod +x loop.sh ralph_stream_parser.py
 
 ### Day-to-Day Usage
 
-**Most of the time (T0–T2):** Just work in Claude Code or Codex normally. The tier system is a mental model, not mandatory process. CLAUDE.md is loaded automatically and gives the LLM project context.
+**Most of the time (T0–T1):** Just work in Claude Code or Codex normally. The tier system is a mental model, not mandatory process. CLAUDE.md is loaded automatically and gives the LLM project context. For T0-T1 tasks, specs are optional — you can discuss requirements inline.
 
-**When scope grows (T2):** Ask the LLM to draft a spec. Review it. Then work through the plan interactively.
+**When scope grows (T2):** Use `/spec-write` to create a formal spec in `specs/` through structured exploration (testable acceptance criteria, edge cases, etc.). Then plan and work through tasks interactively.
 
-**When you have a big batch (T3):** Spec → Plan → approve → `./loop.sh` → `./loop.sh reflect`.
+**When you have a big batch (T3):** `/spec-write` → `/loop.sh plan` → approve → `./loop.sh build` → `./loop.sh reflect`.
 
 **Periodically:** Review `~/AI_RETRO.md`, update Claude.ai memory edits, prune stale rules from AGENTS.md.
 
@@ -388,17 +400,51 @@ The loop auto-detects which CLI you have installed (`claude` or `codex`) and use
 ### Feature Branch Workflow
 
 ```bash
+/spec-write                                        # Write spec (if not already done)
 ./loop.sh plan                                    # Full plan on main
 git checkout -b ralph/user-auth                    # Feature branch
 ./loop.sh plan-work "OAuth with session mgmt"      # Scoped plan
-./loop.sh 15                                       # Build (max 15 tasks)
+./loop.sh build 15                                 # Build (max 15 tasks)
+/review-pr                                         # Review branch before merge
 ./loop.sh reflect                                  # Capture learnings
 gh pr create --base main --fill                    # PR
 ```
 
+**Three quality gates at different levels:**
+- `/spec-write` — **Input quality gate** (before planning). Ensures specs have testable acceptance criteria and edge cases.
+- `PROMPT_review.md` — **Per-commit quality gate** (during `./loop.sh build`). Runs automatically after each build iteration. Scores 1-10, approves/fixes/discards individual commits.
+- `/review-pr` — **Aggregate quality gate** (after build completes). Reviews the full branch diff vs main. Catches cross-file inconsistencies and architectural drift that per-commit reviews miss.
+
 ### Safety
 
 Ralph runs with `--dangerously-skip-permissions`. **Always use a sandbox** (Docker, VM, or at minimum a repo where `git reset --hard` is acceptable). The loop.sh includes a confirmation prompt before starting.
+
+---
+
+## Skills
+
+Skills are structured workflows that live alongside the starter kit. Each skill is a directory with a `SKILL.md` that defines the workflow.
+
+| Skill | Purpose | When to Use |
+|-------|---------|-------------|
+| `/project-init` | Bootstrap project with all workflow files (includes spec writing for initial JTBDs) | Starting a new project or adding AI workflow to an existing one |
+| `/spec-write` | Write a new spec through structured exploration | Adding a new feature to an existing project — the input quality gate |
+| `/review-pr` | Review a feature branch before merging | After build loop completes, before creating a PR |
+
+### Invoking Skills
+
+**Claude Code** has native skill support — use the slash command:
+```
+/project-init
+/spec-write
+/review-pr
+```
+
+**OpenAI Codex** doesn't have slash commands, but the skills are just markdown prompts. Reference the SKILL.md directly:
+```bash
+codex exec "Follow the instructions in spec-write/SKILL.md to write a specification for [feature]."
+codex exec "Follow the instructions in review-pr/SKILL.md to review this branch before merging."
+```
 
 ---
 
@@ -442,7 +488,7 @@ Prompt:
 | **Spec template** | JTBD-oriented with acceptance criteria. |
 | **PROMPT_plan.md** | Faithful Ralph methodology + acceptance-driven tests. |
 | **PROMPT_build.md** | Faithful Ralph methodology. Community battle-tested. |
-| **PROMPT_plan_work.md** | Clean implementation of Clayton Farr's enhancement. |
+| **PROMPT_plan_work.md** | Research-first approach prevents plan-biased feature scoping. |
 | **AI_RETRO.md** | Simple journal. Value comes from the habit. |
 | **INIT_PROMPT.md** | Interview-based bootstrapping. Will refine with use. |
 
@@ -451,7 +497,10 @@ Prompt:
 | Component | What to Verify |
 |-----------|---------------|
 | **loop.sh** | Verify `claude -p` piping, `--dangerously-skip-permissions`, and `--model` flags match your Claude Code CLI version. Test git push handling. Run a 3–5 iteration test on a throwaway repo first. |
+| **PROMPT_review.md** | New review quality gate. Verify scoring calibration — watch for too-lenient (always 9+) or too-aggressive (frequent discards). Tune thresholds after 5–10 iterations. |
 | **PROMPT_reflect.md** | Untested prompt. Concept is proven but wording needs tuning. Expect 2–3 iterations after seeing actual output. |
+| **/spec-write skill** | Input quality gate. Test on a vague feature request to verify it forces testable acceptance criteria and edge case coverage. |
+| **/review-pr skill** | Aggregate quality gate. Test on a feature branch with 5+ commits to verify it catches cross-file issues that per-commit reviews miss. |
 | **Subagent counts** | "Up to 250/500 parallel subagents" comes from Geoff's setup. Start lower if you're watching costs. These are ceilings, not targets. |
 | **Cross-project flow** | AI_RETRO updates are automated via PROMPT_reflect.md, but the compaction logic (promote/archive when Recent >20) hasn't been tested. Watch the first few reflections to verify it consolidates properly. |
 
@@ -503,7 +552,8 @@ Full Codex support is built-in! The system auto-detects your CLI and adapts:
 - Files are named appropriately (AGENTS.md for project instructions, OPS.md for operational guide)
 - `loop.sh` auto-detects and uses the `codex` CLI with `--yolo` mode
 - Stream parser works with both Claude's stream-json and Codex's JSON events
-- All templates and prompts are model-agnostic
+- All templates and prompts are model-agnostic (including the review prompt)
+- All skills work with Codex — reference the `SKILL.md` file directly (e.g., `review-pr/SKILL.md`)
 
 Just install the Codex CLI and run `./loop.sh` — it works identically to Claude Code.
 

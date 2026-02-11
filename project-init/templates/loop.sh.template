@@ -142,6 +142,15 @@ echo "  Logs:   $LOG_DIR/"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# --- Pre-flight checks ---
+# Check if we're in a git repository (required for loop operation)
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Error: Not in a git repository"
+    echo "The Ralph loop requires git for commit tracking and push operations."
+    echo "Run 'git init' to initialize a repository first."
+    exit 1
+fi
+
 # --- Safety check ---
 read -p "Start loop? [y/N] " -n 1 -r
 echo
@@ -181,6 +190,10 @@ run_codex() {
 
 # --- Main loop ---
 ITERATION=0
+REVIEW_APPROVED=0
+REVIEW_FIXED=0
+REVIEW_DISCARDED=0
+REVIEW_SKIPPED=0
 
 while true; do
     if [ $MAX_ITERATIONS -gt 0 ] && [ $ITERATION -ge $MAX_ITERATIONS ]; then
@@ -218,6 +231,33 @@ while true; do
         echo "Continuing to next iteration..."
     fi
 
+    # After build iteration, run review (build mode only)
+    if [ "$MODE" = "build" ] && [ -f "${PROMPTS_DIR}/PROMPT_review.md" ]; then
+        REVIEW_PROMPT=$(cat "${PROMPTS_DIR}/PROMPT_review.md")
+        REVIEW_LOG="${LOG_DIR}/ralph_review_${TIMESTAMP}_iter${ITERATION}.log"
+
+        echo ""
+        echo "  >>> Review phase..."
+        if [ "$RALPH_CLI" = "claude" ]; then
+            run_claude "$REVIEW_PROMPT" "$CLI_MODEL" "$REVIEW_LOG"
+        else
+            run_codex "$REVIEW_PROMPT" "$CLI_MODEL" "$REVIEW_LOG"
+        fi
+
+        # Read and display score
+        if [ -f ".ralph_review_score" ]; then
+            source .ralph_review_score
+            echo "  Review: score=$SCORE action=$ACTION"
+            case "$ACTION" in
+                approved)  REVIEW_APPROVED=$((REVIEW_APPROVED + 1)) ;;
+                fixed)     REVIEW_FIXED=$((REVIEW_FIXED + 1)) ;;
+                discarded) REVIEW_DISCARDED=$((REVIEW_DISCARDED + 1)) ;;
+                skipped)   REVIEW_SKIPPED=$((REVIEW_SKIPPED + 1)) ;;
+            esac
+            rm -f .ralph_review_score
+        fi
+    fi
+
     # Push changes after each iteration (build/plan-work modes) — only if remote exists
     if [ -n "$HAS_REMOTE" ] && { [ "$MODE" = "build" ] || [ "$MODE" = "plan-work" ]; }; then
         echo ""
@@ -235,11 +275,17 @@ done
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Loop finished after $ITERATION iteration(s)"
+if [ "$MODE" = "build" ] && [ $((REVIEW_APPROVED + REVIEW_FIXED + REVIEW_DISCARDED + REVIEW_SKIPPED)) -gt 0 ]; then
+    echo "Reviews: $REVIEW_APPROVED approved, $REVIEW_FIXED fixed, $REVIEW_DISCARDED discarded, $REVIEW_SKIPPED skipped"
+fi
 echo "Logs: $LOG_DIR/"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# --- Post-loop suggestion ---
+# --- Post-loop suggestions ---
 if [ "$MODE" = "build" ] && [ $ITERATION -gt 3 ]; then
     echo ""
     echo "Tip: Run './loop.sh reflect' to capture learnings from this session"
+fi
+if [ "$MODE" = "build" ] && [ $REVIEW_DISCARDED -gt 2 ]; then
+    echo "Warning: $REVIEW_DISCARDED discards — consider re-running './loop.sh plan' to improve task definitions"
 fi

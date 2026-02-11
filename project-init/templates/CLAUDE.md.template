@@ -73,8 +73,10 @@ Override phrases: "just do it" → T0, "let's plan" → T2+, "Ralph it" → T3 w
 ## Ralph Integration (if applicable)
 
 - Specs: `specs/*.md`
-- Plan: `IMPLEMENTATION_PLAN.md`
+- Plan: `IMPLEMENTATION_PLAN.md` (active tasks only)
+- Completed tasks: `IMPLEMENTATION_PLAN_DONE.md`
 - Operational guide: `AGENTS.md`
+- Human comms: `HUMAN.md` (blockers + progress — updated by Ralph during loops)
 - Loop: `./loop.sh <build|plan|plan-work|reflect>`
 - Logs: `logs/` (raw JSONL + human-readable via ralph_stream_parser.py)
 - Cross-project learnings: `~/AI_RETRO.md`

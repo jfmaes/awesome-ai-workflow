@@ -1,8 +1,10 @@
-0a. Study @IMPLEMENTATION_PLAN.md to understand what was accomplished.
+0a. Study @IMPLEMENTATION_PLAN.md and @IMPLEMENTATION_PLAN_DONE.md to understand the full picture of what was accomplished and what remains.
 0b. Study @AGENTS.md to see current operational knowledge.
 0c. Study recent git log (last 20 commits) to see what changed.
 0d. Study `specs/*` to compare intent vs outcome.
 0e. Study ~/AI_RETRO.md (full file) to see current cross-project learnings.
+0f. If @HUMAN.md exists, study it for unresolved blockers and progress entries.
+0g. Study review logs in `logs/ralph_review_*` (if present) to understand review outcomes — how many approved, fixed, discarded, skipped.
 
 1. Perform a structured reflection on the recent build session. Ultrathink.
 
@@ -12,6 +14,8 @@
 - Were there any patterns in failures (wrong assumptions, missing context, bad task sizing)?
 - Did the plan need regeneration? Why?
 - Were specs accurate, or did they need updating?
+- What did the review step catch? Were discards justified or over-aggressive?
+- Are there unresolved blockers in HUMAN.md that need human attention?
 
 ## Produce a reflection report:
 
@@ -20,8 +24,10 @@ Create or update `REFLECTION.md` with:
 ### Session Summary
 - Tasks completed: [count]
 - Tasks requiring rework: [count]
+- Reviews: [approved/fixed/discarded/skipped counts]
 - Plan regenerations: [count]
 - Spec updates: [count]
+- Unresolved blockers: [count, brief description]
 
 ### What Worked
 - [Pattern or approach that was effective]
