@@ -1,0 +1,32 @@
+# Agent Autopilot
+
+This repo uses the `ultimate-agentic-workflow` skill for non-trivial AI coding work.
+
+## Project
+
+- Name: {project_name}
+- Source: {source_dir}
+- Tests: {tests_dir}
+
+## Commands
+
+- Build: `{build_command}`
+- Run: `{run_command}`
+- Test: `{test_command}`
+- Lint: `{lint_command}`
+- Typecheck: `{typecheck_command}`
+
+## Workflow
+
+Classify work before starting:
+
+- T0: answer or tiny safe edit directly
+- T1: short approach, execute, verify
+- T2: spec and plan before implementation
+- T3: full traceability workflow with `.workflow/`, risk gates, verification ledger, review, reflection, and archive
+
+Use `ultimate-agentic-workflow` for T2/T3 work, repo initialization, CLAUDE.md updates, traceability, or multi-agent orchestration.
+
+Keep this file short. Operational notes belong in `AGENTS.md`; active task status belongs in the plan or `.workflow/`.
+
+Do not claim completion without fresh evidence.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ultimate Agentic Workflow"
+  short_description: "Tiered AI workflow with traceability and agent bootstrapping"
+  default_prompt: "Use $ultimate-agentic-workflow to initialize or run an accountable AI coding workflow for this repo."

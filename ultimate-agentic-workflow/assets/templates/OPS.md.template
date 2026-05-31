@@ -1,0 +1,23 @@
+# Operational Guide
+
+Keep this file under 60 lines. Status and progress belong in the active plan or `.workflow/`.
+
+## Build And Run
+
+- Build: `{build_command}`
+- Run: `{run_command}`
+
+## Validation
+
+- Test: `{test_command}`
+- Lint: `{lint_command}`
+- Typecheck: `{typecheck_command}`
+
+## Operational Notes
+
+- Add durable repo-specific lessons here only when they change future agent behavior.
+
+## Codebase Patterns
+
+- Source: `{source_dir}`
+- Tests: `{tests_dir}`
