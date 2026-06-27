@@ -42,7 +42,7 @@ Classify before acting:
 - **T2:** write spec/plan before implementation
 - **T3:** create full traceability workflow with `.workflow/`, risk gates, verification ledger, review, reflection, and archive
 
-Escalate for security, production data, secrets, migrations, deployments, broad edits, ambiguous requirements, subagents, loops, or multi-session work.
+Escalate for security, production data, secrets, migrations, deployments, broad edits, ambiguous requirements, large or unfamiliar codebases, subagents, loops, or multi-session work.
 
 ## Execution Rules
 
@@ -65,3 +65,8 @@ Read `references/workflow.md` for:
 - review records
 - reflection/archive templates
 - Ralph loop policy
+
+Read `references/large-codebase.md` for large or unfamiliar codebases, optional MCP/search tooling, and permission-gated `.codex` / `.claude` / GitHub dependency setup.
+Use `scripts/large_codebase_tools.py --project-root . --json` as the read-only readiness check before asking to install Serena or related large-codebase tools.
+
+Read `references/pilot-measurement.md` before treating any acceleration tool as default-on or citing efficiency gains.

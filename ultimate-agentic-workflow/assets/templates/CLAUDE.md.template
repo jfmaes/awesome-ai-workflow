@@ -27,6 +27,10 @@ Classify work before starting:
 
 Use `ultimate-agentic-workflow` for T2/T3 work, repo initialization, CLAUDE.md updates, traceability, or multi-agent orchestration.
 
+## Permissioned Setup
+
+Before installing dependencies, editing `.claude`, cloning GitHub repos, or writing outside the workspace, ask for user approval with exact commands, target paths, network/data risks, and rollback.
+
 Keep this file short. Operational notes belong in `AGENTS.md`; active task status belongs in the plan or `.workflow/`.
 
 Do not claim completion without fresh evidence.

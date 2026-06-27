@@ -17,6 +17,12 @@ Keep this file under 60 lines. Status and progress belong in the active plan or 
 
 - Add durable repo-specific lessons here only when they change future agent behavior.
 
+## Dependency And Repo Setup
+
+- `.codex` / `.claude` setup and dependent `git clone` work require explicit user approval before execution.
+- Approval requests must include exact commands, write targets, network/data risks, and rollback.
+- Prefer project-local setup over global changes unless the user asks for global config.
+
 ## Codebase Patterns
 
 - Source: `{source_dir}`

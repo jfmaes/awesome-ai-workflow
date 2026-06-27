@@ -204,6 +204,18 @@ Context loading policy:
 - Prefer primary source docs for external APIs.
 - Record sources read in a source ledger for T2+.
 
+Search routing policy:
+
+| Need | Tool | Trigger Signal |
+| --- | --- | --- |
+| Known string / literal / fast scan | `rg` | You roughly know the text, filename, error, route, config key, or symbol. |
+| Definition, references, callers, or safe rename | LSP/code-intelligence tools such as Serena | You need symbol graph facts across files. |
+| Structural pattern | `ast-grep`, tree-sitter, or a language parser | Code shape matters more than exact text. |
+| Fuzzy concept | semantic search such as grepai | Exact text, symbol, and structural searches failed. Use as a last resort. |
+
+For large or unfamiliar codebases, read `references/large-codebase.md` before adding MCP/search tools or cloning dependent repos.
+If large-codebase signals are present, run `python3 ultimate-agentic-workflow/scripts/large_codebase_tools.py --project-root . --json` to check tool readiness and generate approval text before installing Serena or related tools.
+
 Exit evidence:
 
 ```markdown
@@ -719,6 +731,13 @@ Review stages:
 2. Code quality review: is the implementation maintainable, simple, and consistent?
 3. Risk review: did the work introduce security, reliability, data, or operational hazards?
 4. Human review: required before merge, PR, external publishing, or irreversible operations.
+
+Simplicity gate:
+
+- Check whether the needed behavior already exists in the repo before writing new code.
+- Can stdlib, native platform APIs, or an already installed dependency solve it?
+- Is the custom code the smallest safe diff that preserves correctness, security, tests, and user scope?
+- Did the change avoid new dependencies, MCP tools, generated code, or external repos unless the user approved the added setup?
 
 Review record:
 
