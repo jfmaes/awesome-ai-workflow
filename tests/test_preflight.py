@@ -33,7 +33,7 @@ def test_empty_repo_gets_ordered_bootstrap_steps(tmp_path):
     report = module.build_report(tmp_path, home=tmp_path / "fakehome")
 
     steps = "\n".join(report["next_steps"])
-    assert "init_agents.py --cli claude --claude-kit" in steps
+    assert "init_agents.py --cli both --claude-kit" in steps
     assert "git init" in steps
     assert "superpowers" in steps.lower()
     assert report["frameworks"]["superpowers"]["installed"] is False
@@ -116,3 +116,31 @@ def test_generated_ops_is_recognized_as_ours(tmp_path):
     report = module.build_report(tmp_path, home=tmp_path / "fakehome")
 
     assert report["repo"]["ops"] == "ours"
+
+
+def test_unwired_stop_gate_is_flagged_when_settings_predates_kit(tmp_path):
+    # A repo with a pre-existing settings.json: the kit installer must not touch
+    # it, and preflight must say the gate is NOT running.
+    existing = tmp_path / ".claude" / "settings.json"
+    existing.parent.mkdir(parents=True)
+    existing.write_text('{"permissions": {}}', encoding="utf-8")
+
+    init = load_init()
+    init.write_files(init.plan_claude_kit(tmp_path), force=False)
+    (tmp_path / ".claude" / "stop-gate.json").write_text('{"checks": []}', encoding="utf-8")
+
+    module = load_preflight()
+    report = module.build_report(tmp_path, home=tmp_path / "fakehome")
+
+    assert report["repo"]["stop_gate_wired"] is False
+    steps = "\n".join(report["next_steps"])
+    assert "NOT wired" in steps
+
+
+def test_wired_stop_gate_detected_from_template_settings(tmp_path):
+    init = load_init()
+    init.write_files(init.plan_claude_kit(tmp_path), force=False)
+    module = load_preflight()
+    report = module.build_report(tmp_path, home=tmp_path / "fakehome")
+
+    assert report["repo"]["stop_gate_wired"] is True

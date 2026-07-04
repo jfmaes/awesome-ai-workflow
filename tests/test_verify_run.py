@@ -96,3 +96,16 @@ def test_invalid_utf8_is_reported_not_crashed(tmp_path):
 
     problems = module.verify_run(run_dir)
     assert problems == ["state.json is not valid UTF-8"]
+
+
+def test_sections_inside_code_fences_do_not_count(tmp_path):
+    run_dir = tmp_path / ".workflow" / "demo"
+    make_valid_run(run_dir)
+    fenced = "# Plan\n\n```markdown\n" + "\n".join(
+        ["## Goal", "## Success Criteria", "## Constraints", "## Risks", "## Work Packets", "## Verification"]
+    ) + "\n```\n"
+    (run_dir / "plan.md").write_text(fenced, encoding="utf-8")
+    module = load_module()
+
+    problems = module.verify_run(run_dir)
+    assert any("## Goal" in problem for problem in problems)

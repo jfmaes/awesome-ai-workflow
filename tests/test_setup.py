@@ -51,3 +51,12 @@ def test_interactive_decline_writes_nothing(tmp_path):
     assert "Aborted" in result.stdout
     assert not (tmp_path / "OPS.md").exists()
     assert not (tmp_path / ".claude").exists()
+
+
+def test_no_stdin_aborts_cleanly_instead_of_crashing(tmp_path):
+    result = run_setup(["--project-root", str(tmp_path)], cwd=tmp_path, stdin="")
+
+    assert result.returncode == 0, result.stderr
+    assert "Traceback" not in result.stderr
+    assert "--yes" in result.stdout
+    assert not (tmp_path / "OPS.md").exists()

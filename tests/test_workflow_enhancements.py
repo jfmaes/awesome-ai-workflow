@@ -79,39 +79,42 @@ def test_single_search_routing_table_lives_in_large_codebase_reference():
         assert "large-codebase.md" in content
 
 
-def test_orchestration_reference_covers_fanout_verification_and_loops():
-    content = read("ultimate-agentic-workflow/references/orchestration.md")
-
-    required = [
-        "Fan-Out Sizing",
-        "Packet Contract",
-        "packet_id",
-        "disjoint write scope",
-        "Model and Effort Tiering",
-        "Fresh-context verifier",
-        "Skeptic pass",
-        "Reward-hack check",
-        "Judge Panel",
-        "Loop-Until-Dry",
-        "Stop Conditions",
-        "Circuit breaker",
-    ]
-    for phrase in required:
-        assert phrase in content, f"orchestration.md missing: {phrase}"
+def headings(path: str) -> set[str]:
+    return {
+        line.strip()
+        for line in read(path).splitlines()
+        if line.strip().startswith("##")
+    }
 
 
-def test_context_engineering_reference_covers_notes_compaction_and_isolation():
-    content = read("ultimate-agentic-workflow/references/context-engineering.md")
+def test_orchestration_reference_keeps_its_section_contract():
+    # Structural contract: SKILL.md routes agents here for these concerns, so
+    # the sections must exist as real headings, not just mentioned words.
+    found = headings("ultimate-agentic-workflow/references/orchestration.md")
+    for section in [
+        "## Fan-Out Sizing",
+        "## Packet Contract",
+        "## Worker Rules",
+        "## Model and Effort Tiering",
+        "## Verification Patterns",
+        "## Judge Panel for Design Selection",
+        "## Loop-Until-Dry Discovery",
+        "## Autonomous Loop Stop Conditions",
+    ]:
+        assert section in found, f"orchestration.md lost section: {section}"
 
-    required = [
-        "just-in-time",
-        "Durable Notes",
-        "Compaction Survival",
-        "Subagent Context Isolation",
-        "file:line",
-    ]
-    for phrase in required:
-        assert phrase in content, f"context-engineering.md missing: {phrase}"
+
+def test_context_engineering_reference_keeps_its_section_contract():
+    found = headings("ultimate-agentic-workflow/references/context-engineering.md")
+    for section in [
+        "## Loading Policy",
+        "## Durable Notes",
+        "## Compaction Survival",
+        "## Subagent Context Isolation",
+        "## Tool-Output Hygiene",
+        "## Altitude Control",
+    ]:
+        assert section in found, f"context-engineering.md lost section: {section}"
 
 
 def test_tool_catalog_and_large_codebase_doc_stay_in_sync():

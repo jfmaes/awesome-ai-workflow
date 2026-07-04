@@ -42,7 +42,7 @@ Full checklist in the `/mint-skill` skill; the invariants:
 - The `description` is the trigger mechanism: third person, what + when, concrete vocabulary a user would actually use — and tested against should-fire / should-not-fire prompts, not guessed.
 - One default path plus an escape hatch; no option menus.
 - Side-effecting skills are manual-invocation only.
-- Subagents get minimum tools; reviewers and verifiers are read-only.
+- Subagents get minimum tools; reviewers and verifiers get no Edit/Write (Bash stays, restricted by instruction to non-mutating commands).
 - Try it on one real task before calling it shipped.
 
 ## Architect Coverage Map
@@ -71,7 +71,7 @@ Frameworks worth knowing, each with the one idea this system adopted or recommen
 | Compound engineering (Every) | Plan-heavy loop ending in a `/compound` learning step | A dedicated learning-capture step every session — adopted as `/retro` + the learning gate |
 | teach / reflect / upskill (alexknowshtml) | Session-sourced Socratic quizzing and retrospectives | Session transcripts are a lesson mine; capture before the session ends — adopted in the learning gate concept |
 | Beads (`bd`) | Dependency-graph issue tracker built for agents | `bd ready`-style "what is unblocked now" beats flat TODO lists for multi-session/multi-agent work — consider it when `.workflow/state.json` packets outgrow themselves |
-| GSD (original archived June 2026; successor `open-gsd/gsd-core`) | Spec-driven system with research/plan/execute/verify agent roles | The named four-role split — mirrored by our researcher/implementer/test-runner/skeptic-verifier agents |
+| GSD (original archived June 2026; successor open-gsd/gsd-core, npm `@opengsd/gsd-core`) | Spec-driven system with research/plan/execute/verify agent roles | The named four-role split — mirrored by our researcher/implementer/test-runner/skeptic-verifier agents |
 | skill-creator (Anthropic) | Meta-skill for authoring skills | Treat the trigger description as something you test and tune, not write once — adopted in `/mint-skill` |
 
 Ecosystem facts drift; verify a framework's current state against its repo before adopting it, per `pilot-measurement.md`.

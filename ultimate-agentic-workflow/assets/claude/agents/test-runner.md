@@ -19,4 +19,6 @@ Return, and only return:
 - Counts: N passed, M failed, K skipped.
 - Anything anomalous: warnings that look new, suspiciously fast runs, zero tests collected.
 
+Bash is for running the requested checks only — never use it to modify files, git state, or the environment.
+
 Never summarize a failure as "some tests failed" — name them. Never claim success without having read the exit code. If a command hangs or errors before running any tests, report that as its own failure, not as a pass.

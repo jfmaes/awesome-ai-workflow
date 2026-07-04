@@ -87,6 +87,9 @@ def main() -> int:
 
     failures = []
     for check in checks:
+        if not isinstance(check, dict):
+            failures.append(f"[config] invalid entry in stop-gate.json (expected an object): {check!r}")
+            continue
         name = str(check.get("name") or check.get("command") or "check")
         command = check.get("command")
         if not command:

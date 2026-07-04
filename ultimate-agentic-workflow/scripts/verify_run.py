@@ -36,6 +36,20 @@ def read_utf8(path: Path) -> tuple[str | None, list[str]]:
         return None, [f"{path.name} could not be read: {error}"]
 
 
+def markdown_headings(content: str) -> set[str]:
+    """Heading lines outside code fences, so fenced examples don't count."""
+    headings: set[str] = set()
+    in_fence = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+            continue
+        if not in_fence and stripped.startswith("#"):
+            headings.add(stripped)
+    return headings
+
+
 def check_plan(run_dir: Path) -> list[str]:
     plan = run_dir / "plan.md"
     if not plan.is_file():
@@ -43,10 +57,11 @@ def check_plan(run_dir: Path) -> list[str]:
     content, problems = read_utf8(plan)
     if content is None:
         return problems
+    headings = markdown_headings(content)
     return [
         f"plan.md missing section: {section}"
         for section in PLAN_REQUIRED_SECTIONS
-        if section not in content
+        if section not in headings
     ]
 
 

@@ -81,7 +81,11 @@ def main() -> int:
     for path in sorted(files):
         print(f"  {path.relative_to(root)}")
     if not args.yes:
-        answer = input(f"\nWrite {len(files)} files? [y/N] ").strip().lower()
+        try:
+            answer = input(f"\nWrite {len(files)} files? [y/N] ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("\nNo interactive input available — nothing was written. Re-run with --yes to apply.")
+            return 0
         if answer not in ("y", "yes"):
             print("Aborted — nothing was written.")
             return 0

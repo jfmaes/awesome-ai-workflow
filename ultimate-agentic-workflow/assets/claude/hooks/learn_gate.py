@@ -17,11 +17,15 @@ trivial sessions have no lessons worth a forced extra turn.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
 
+# Sessions shorter than this are let through without a prompt; trivial
+# sessions have no lessons worth a forced extra turn.
 MIN_TRANSCRIPT_LINES = 40
 
 REASON = (
@@ -36,9 +40,12 @@ REASON = (
 )
 
 
-def marker_path(session_id: str) -> Path:
+def marker_path(session_id: str, project: str) -> Path:
     safe = "".join(c for c in session_id if c.isalnum() or c in "-_") or "unknown"
-    return Path(tempfile.gettempdir()) / f"claude-learn-gate-{safe}"
+    # Scope the once-per-session marker to the project too, so the same
+    # session id in a different project still gets its own prompt.
+    scope = hashlib.sha256(project.encode("utf-8", errors="replace")).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / f"claude-learn-gate-{safe}-{scope}"
 
 
 def transcript_is_substantive(transcript_path: str) -> bool:
@@ -63,7 +70,8 @@ def main() -> int:
     if event.get("stop_hook_active"):
         return 0
 
-    marker = marker_path(str(event.get("session_id") or ""))
+    project = os.environ.get("CLAUDE_PROJECT_DIR") or str(event.get("cwd") or "")
+    marker = marker_path(str(event.get("session_id") or ""), project)
     if marker.exists():
         return 0
 

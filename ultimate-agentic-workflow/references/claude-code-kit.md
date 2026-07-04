@@ -23,11 +23,13 @@ Installed to `.claude/agents/`. Each is deliberately narrow; delegation is drive
 
 | Agent | Role | Tools |
 | --- | --- | --- |
-| `code-reviewer` | Spec-compliance, correctness, security, simplicity review of diffs | read-only + Bash |
-| `skeptic-verifier` | Adversarially refutes "done" claims and load-bearing findings | read-only + Bash |
-| `test-runner` | Runs checks, absorbs verbose output, returns failures only (haiku-class) | read-only + Bash |
-| `researcher` | Bounded read-only discovery with `file:line` evidence | read-only + web |
+| `code-reviewer` | Spec-compliance, correctness, security, simplicity review of diffs | no Edit/Write; Bash for checks only |
+| `skeptic-verifier` | Adversarially refutes "done" claims and load-bearing findings | no Edit/Write; Bash for checks only |
+| `test-runner` | Runs checks, absorbs verbose output, returns failures only (haiku-class) | no Edit/Write; Bash for checks only |
+| `researcher` | Bounded discovery with `file:line` evidence | no Edit/Write; Bash + web, non-mutating |
 | `implementer` | One approved task, TDD, disjoint write scope | full |
+
+"No Edit/Write" is enforced by the `tools` field; Bash mutation is prevented by instruction (each agent's rules forbid state-changing commands), not by the harness — Bash is needed to run diffs, tests, and searches.
 
 These map onto the execution modes in `workflow.md` and the patterns in `orchestration.md`: implementer + code-reviewer + skeptic-verifier is subagent-driven development with fresh-context review; test-runner and researcher are context-isolation workers.
 
@@ -36,7 +38,7 @@ Worktree isolation for parallel implementers is the dispatcher's job: create the
 Interplay with the frameworks the preflight recommends:
 
 - **Superpowers ships skills, not subagents.** Its brainstorming/TDD/plan/subagent-driven-development skills define the *process*; these agents are the tool-restricted *workers* that process should dispatch. A skill cannot make a reviewer read-only — only a subagent's `tools` field can — so the two compose rather than compete. When Superpowers is installed, drive implementation with its subagent-driven-development skill and dispatch `implementer`/`code-reviewer`/`skeptic-verifier` as its workers.
-- **GSD (gsd-core) ships its own 12 agents**, wired to its `/gsd-*` commands and `.planning/` structure. If you adopt the full GSD workflow, its `gsd-code-reviewer`/`gsd-researcher` supersede this kit's equivalents — delete the redundant ones. `skeptic-verifier` and `test-runner` have no equivalent in either framework and are worth keeping regardless.
+- **GSD (gsd-core) ships its own large agent roster** (30+ `gsd-*` agents, including `gsd-code-reviewer` and several specialized researchers), wired to its `/gsd-*` commands and `.planning/` structure. If you adopt the full GSD workflow, its reviewer/researcher agents supersede this kit's equivalents — delete the redundant ones. `skeptic-verifier` and `test-runner` have no equivalent in either framework and are worth keeping regardless.
 
 ## Hooks
 

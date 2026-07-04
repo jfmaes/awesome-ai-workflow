@@ -26,7 +26,7 @@ Before building: check whether an existing skill in this repo, the user's collec
 - One default path plus an escape hatch — not an option menu.
 - Multi-step flows get a literal `- [ ]` checklist.
 - Side-effecting skills (deploy, publish, commit) get `disable-model-invocation: true`.
-- Subagents get the minimum tool set that does the job (reviewers and verifiers are read-only).
+- Subagents get the minimum tool set that does the job (reviewers and verifiers get no Edit/Write).
 
 ## Step 3: Tune the trigger description
 

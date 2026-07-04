@@ -56,6 +56,22 @@ def file_role(path: Path) -> str:
     return "ours" if BOOTLOADER_MARKER in content else "foreign"
 
 
+def stop_gate_wired(root: Path) -> bool:
+    """True only if .claude/settings.json actually wires the stop-gate hook."""
+    settings = root / ".claude" / "settings.json"
+    try:
+        data = json.loads(settings.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    for group in (data.get("hooks", {}) or {}).get("Stop") or []:
+        if not isinstance(group, dict):
+            continue
+        for hook in group.get("hooks") or []:
+            if isinstance(hook, dict) and "stop_gate.py" in str(hook.get("command", "")):
+                return True
+    return False
+
+
 def check_repo(root: Path) -> dict:
     git_dir = (root / ".git").exists()
     dirty = None
@@ -76,6 +92,7 @@ def check_repo(root: Path) -> dict:
         "kit_agents_present": kit_agents_present,
         "kit_hooks_present": (root / ".claude" / "hooks" / "stop_gate.py").is_file(),
         "kit_skills_present": (root / ".claude" / "skills" / "retro" / "SKILL.md").is_file(),
+        "stop_gate_wired": stop_gate_wired(root),
         "stop_gate_configured": (root / ".claude" / "stop-gate.json").is_file(),
         "workflow_runs": (root / ".workflow").is_dir(),
     }
@@ -136,7 +153,10 @@ def build_next_steps(repo: dict, tools: dict, project: dict, frameworks: dict) -
     # Reference the installed script by its real location so the printed
     # command works from a repo clone, a skills dir, or a plugin cache alike.
     init_script = Path(__file__).with_name("init_agents.py")
-    init = f"python3 {init_script} --cli claude --claude-kit --project-root ."
+    init = (
+        f"python3 {init_script} --cli both --claude-kit --project-root . "
+        "(drop --claude-kit for non-Claude harnesses)"
+    )
 
     if repo["bootloader_claude"] == "missing" and repo["bootloader_codex"] == "missing":
         steps.append(f"Bootstrap agent files and the .claude kit: {init}")
@@ -150,6 +170,12 @@ def build_next_steps(repo: dict, tools: dict, project: dict, frameworks: dict) -
     elif not repo["kit_agents_present"]:
         steps.append(f"Bootloaders exist; add the .claude kit: {init}")
 
+    if repo["kit_hooks_present"] and not repo["stop_gate_wired"]:
+        steps.append(
+            "Stop-gate hook script is installed but NOT wired into .claude/settings.json — the gate "
+            "is not running. Merge the Stop hook entry from .claude/settings.json.template into "
+            ".claude/settings.json."
+        )
     if repo["kit_hooks_present"] and not repo["stop_gate_configured"]:
         steps.append(
             "Configure the stop gate: create .claude/stop-gate.json with this repo's test/lint "
@@ -220,7 +246,12 @@ def print_human(report: dict) -> None:
     print(f"- CLAUDE.md: {repo['bootloader_claude']}; AGENTS.md: {repo['bootloader_codex']}; OPS.md: {repo['ops']}")
     kit = f"{len(repo['kit_agents_present'])}/{len(KIT_AGENTS)} agents"
     kit += ", hooks" if repo["kit_hooks_present"] else ", no hooks"
-    kit += ", stop gate configured" if repo["stop_gate_configured"] else ", stop gate not configured"
+    if not repo["stop_gate_wired"]:
+        kit += ", stop gate NOT wired in settings.json"
+    elif repo["stop_gate_configured"]:
+        kit += ", stop gate wired + configured"
+    else:
+        kit += ", stop gate wired but no stop-gate.json"
     print(f"- .claude kit: {kit}")
     print(f"- Project: {report['project']['file_count']} files, languages: {', '.join(report['project']['languages']) or 'none detected'}")
     tools = ", ".join(f"{name}={'ok' if ok else 'missing'}" for name, ok in report["tools"].items())

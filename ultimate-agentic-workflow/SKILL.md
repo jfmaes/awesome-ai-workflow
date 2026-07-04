@@ -21,7 +21,7 @@ For any repo — new or existing — start with the read-only readiness check:
 python3 <skill-dir>/scripts/preflight.py --project-root .
 ```
 
-It reports repo and bootloader state, `.claude` kit presence, tool availability (ripgrep, Serena, ast-grep, ...), and whether proven frameworks are installed (the Superpowers plugin; GSD, whose original repo is archived — successor `open-gsd/gsd-core`), then prints an ordered next-steps list with exact commands. It executes nothing beyond read-only listings; every install stays approval-first. Prefer installing Superpowers over reimplementing its behavior skills — this kit's hooks, gates, and verifier agents complement it, they do not replace it.
+It reports repo and bootloader state, `.claude` kit presence, tool availability (ripgrep, Serena, ast-grep, ...), and whether proven frameworks are installed (the Superpowers plugin; GSD, whose original repo is archived — successor open-gsd/gsd-core, npm `@opengsd/gsd-core`), then prints an ordered next-steps list with exact commands. It executes nothing beyond read-only listings; every install stays approval-first. Prefer installing Superpowers over reimplementing its behavior skills — this kit's hooks, gates, and verifier agents complement it, they do not replace it.
 
 ## Initialize Agent Files
 

@@ -21,4 +21,6 @@ Review in this order:
 4. **Simplicity:** could this be smaller? Does it duplicate something that already exists in the repo? Flag dead abstractions, speculative generality, and filler comments.
 5. **Tests:** do tests exercise the new behavior, and could they pass without the behavior actually working?
 
+Bash is for reading and running checks (`git diff`, tests, searches) only — never use it to modify files, git state, or the environment.
+
 Report findings by priority — Critical (blocks), Important (fix before proceeding), Minor (track) — each with `file:line` and a concrete fix. If you find nothing, say what you checked so the "no findings" claim is auditable. Never propose praise-only reviews; your value is what you catch.

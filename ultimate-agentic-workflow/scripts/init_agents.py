@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 
@@ -133,8 +134,9 @@ def detect_context(root: Path) -> dict[str, str]:
 
     source_candidates = ["src", "app", "apps", "lib", "cmd", "pkg", "internal", "packages", "services"]
     tests_candidates = ["tests", "test", "__tests__", "spec"]
-    source_dir = next((p for p in source_candidates if (root / p).exists()), "not detected")
-    tests_dir = next((p for p in tests_candidates if (root / p).exists()), "not detected")
+    fallback = "no standard directory detected (repo root?)"
+    source_dir = next((p for p in source_candidates if (root / p).exists()), fallback)
+    tests_dir = next((p for p in tests_candidates if (root / p).exists()), fallback)
 
     context = {
         "project_name": str(project_name),
@@ -191,7 +193,7 @@ def plan_claude_kit(root: Path) -> dict[Path, str]:
     return files
 
 
-def write_files(files: dict[Path, str], force: bool) -> None:
+def write_files(files: dict[Path, str], force: bool, skip_existing: bool = False) -> None:
     # All-or-nothing: every unwritable target is detected before any write,
     # with or without --force.
     directories = sorted(str(path) for path in files if path.is_dir())
@@ -199,13 +201,18 @@ def write_files(files: dict[Path, str], force: bool) -> None:
         raise SystemExit(
             "refusing to overwrite directories (no files were written): " + ", ".join(directories)
         )
-    if not force:
+    if skip_existing:
+        skipped = sorted(path.name for path in files if path.exists())
+        files = {path: content for path, content in files.items() if not path.exists()}
+        if skipped:
+            print(f"skipping existing: {', '.join(skipped)}")
+    elif not force:
         existing = sorted(str(path) for path in files if path.exists())
         if existing:
             raise SystemExit(
                 "refusing to overwrite existing files (no files were written): "
                 + ", ".join(existing)
-                + ". Re-run with --force to overwrite."
+                + ". Re-run with --force to overwrite everything, or --skip-existing to write only the missing files."
             )
     for path, content in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -228,6 +235,11 @@ def main() -> int:
         action="store_true",
         help="Print the rendered files instead of writing them (for merging into existing repos).",
     )
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="Write only the missing files; leave every existing file untouched.",
+    )
     args = parser.parse_args()
 
     root = Path(args.project_root).resolve()
@@ -239,11 +251,14 @@ def main() -> int:
     if args.claude_kit:
         files.update(plan_claude_kit(root))
     if args.stdout:
-        for path, content in files.items():
-            print(f"===== {path.relative_to(root)} =====")
-            print(content)
+        try:
+            for path, content in files.items():
+                print(f"===== {path.relative_to(root)} =====")
+                print(content)
+        except BrokenPipeError:  # piped through head/less and closed early
+            sys.stderr.close()
         return 0
-    write_files(files, args.force)
+    write_files(files, args.force, args.skip_existing)
     return 0
 
 

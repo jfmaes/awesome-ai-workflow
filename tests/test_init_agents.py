@@ -137,8 +137,8 @@ def test_undetected_dirs_are_reported_honestly(tmp_path):
     module = load_module()
     context = module.detect_context(tmp_path)
 
-    assert context["source_dir"] == "not detected"
-    assert context["tests_dir"] == "not detected"
+    assert context["source_dir"] == "no standard directory detected (repo root?)"
+    assert context["tests_dir"] == "no standard directory detected (repo root?)"
 
 
 def test_force_refuses_directory_targets_before_writing_anything(tmp_path):
@@ -150,3 +150,14 @@ def test_force_refuses_directory_targets_before_writing_anything(tmp_path):
         module.write_files(module.plan_files("claude", tmp_path, context), force=True)
     assert "no files were written" in str(exc.value)
     assert not (tmp_path / "OPS.md").exists()
+
+
+def test_skip_existing_writes_only_missing_files(tmp_path):
+    module = load_module()
+    (tmp_path / "OPS.md").write_text("# my own ops\n", encoding="utf-8")
+    context = module.detect_context(tmp_path)
+
+    module.write_files(module.plan_files("claude", tmp_path, context), force=False, skip_existing=True)
+
+    assert (tmp_path / "CLAUDE.md").is_file()
+    assert (tmp_path / "OPS.md").read_text(encoding="utf-8") == "# my own ops\n"

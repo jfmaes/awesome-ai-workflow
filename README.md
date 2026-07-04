@@ -6,7 +6,7 @@
 python3 ultimate-agentic-workflow/scripts/setup.py --project-root .
 ```
 
-That's it. It audits your repo read-only, shows exactly what it will create, asks once, and writes. Nothing is ever overwritten.
+That's it. It audits your repo read-only, shows exactly what it will create, asks once, and writes. Nothing is ever overwritten. (Command shown for a repo clone; installed as a plugin or skill, replace `ultimate-agentic-workflow/` with your install's skill directory — every script works from any location.)
 
 ## Why Use This
 
@@ -18,12 +18,12 @@ Agentic coding fails in predictable ways. Each one gets a mechanism here — not
 | **Slop** — filler comments, dead abstractions, gamed tests, flattering summaries | `anti-slop.md`: a 7-rung minimalism ladder (with a hard safety carve-out), and a slop taxonomy for code, tests, prose, and artifacts that reviews are run against. |
 | **Context rot on long tasks** | `context-engineering.md`: just-in-time retrieval, durable notes that survive compaction, subagent context isolation with distilled 1-2k-token returns. |
 | **No traceability** — what was asked, decided, verified? | T0-T3 tiers with one canonical state file per tier, a requirement traceability matrix, and a verification ledger that final claims must cite. Validated by `verify_run.py`, not by promises. |
-| **Multi-agent chaos or waste** | `orchestration.md`: when fan-out pays (~15x token cost — usually discovery/review/verification, *not* authoring), sizing tables, structured packet contracts, model tiering, judge panels, loop-until-dry. |
+| **Multi-agent chaos or waste** | `orchestration.md`: when fan-out pays (roughly an order of magnitude more tokens — usually worth it for discovery/review/verification, *not* authoring), sizing tables, structured packet contracts, model tiering, judge panels, loop-until-dry. |
 | **Goal loops that never terminate or terminate early** | Deterministic conditions → the stop gate. Judgment conditions → the built-in `/goal`. Batch loops → machine-checkable stop conditions, circuit breakers, budget caps. |
-| **Every session relearns the same lessons** | `/retro` mines each session for durable lessons and routes them to the right home; `/mint-skill` turns repeated workflows into new skills/subagents with tuned trigger descriptions; an optional learning gate fires `/retro` once per session automatically. |
+| **Every session relearns the same lessons** | `/retro` mines each session for durable lessons and routes them to the right home; `/mint-skill` turns repeated workflows into new skills/subagents with tuned trigger descriptions; an optional learning gate blocks the first stop of a session once and prompts a `/retro` pass before the agent can finish. |
 | **Reinventing what the ecosystem already solved** | The preflight detects and recommends proven frameworks (Superpowers plugin, GSD's successor) with exact install commands, and `meta.md` maps the ecosystem (Ponytail, Headroom, Beads, compound engineering) so you steal ideas instead of rebuilding them. |
 
-Grounded, not vibes: built from Anthropic's primary engineering guidance (context engineering, the multi-agent research system, skill authoring), reviewed by adversarial multi-agent passes whose skeptic verifiers reproduced every reported bug before it was fixed, and covered by 57 behavioral tests.
+Grounded, not vibes: built from Anthropic's primary engineering guidance (context engineering, the multi-agent research system, skill authoring), reviewed by adversarial multi-agent passes whose skeptic verifiers reproduced every reported bug before it was fixed, and covered by a behavioral test suite (`python3 -m pytest -q`).
 
 ## Quick Start (any repo, new or existing)
 
@@ -49,7 +49,7 @@ python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit
 The preflight also checks that core tools are usable (ripgrep, Serena, ast-grep,
 uv) and whether proven frameworks are installed — the Superpowers plugin
 (`/plugin install superpowers@claude-plugins-official`) and GSD (original repo
-archived; successor `npx @opengsd/gsd-core@latest`) — and prints install
+archived; successor open-gsd/gsd-core, install: `npx @opengsd/gsd-core@latest`) — and prints install
 commands for anything missing. It installs nothing itself; every install is
 approval-first.
 
@@ -135,7 +135,6 @@ subagents, loops, or multi-session execution.
 ultimate-agentic-workflow/
 |-- SKILL.md                     # the router — agents start here
 |-- .claude-plugin/plugin.json   # plugin manifest
-|-- agents/openai.yaml
 |-- scripts/
 |   |-- setup.py                 # one-command guided setup
 |   |-- preflight.py             # read-only readiness audit
@@ -161,7 +160,7 @@ ultimate-agentic-workflow/
     `-- pilot-measurement.md     # measure tools before trusting them
 
 .claude-plugin/marketplace.json  # makes this repo /plugin-installable
-tests/                           # 57 behavioral tests
+tests/                           # behavioral test suite
 ```
 
 ## Development
@@ -214,9 +213,9 @@ git diff --check                                                # whitespace
   non-object/empty `package.json` crashes, partial writes under `--force`,
   symlink and ignored-dir handling in the readiness checker; added
   `verify_run.py`; multi-ecosystem command detection.
-- **Tests**: phrase-presence checks replaced with 57 behavioral tests,
-  including regressions for every bug confirmed by two adversarial
-  multi-agent review passes (26 reviewer/verifier agents).
+- **Tests**: phrase-presence checks replaced with behavioral tests,
+  including regressions for every bug confirmed by adversarial
+  multi-agent review passes.
 
 ### 2026-05 — v1
 

@@ -66,7 +66,10 @@ def test_agent_files_have_required_frontmatter_and_safe_tools():
     for name, path in agent_files.items():
         fields = parse_frontmatter(path)
         assert fields.get("name") == name
-        assert len(fields.get("description", "")) > 40
+        description = fields.get("description", "")
+        assert len(description) > 40
+        # what + when: every description must say when to invoke, not just what it is
+        assert "Use " in description, f"{name} description lacks a when-to-use clause"
 
     # Reviewers and verifiers must be read-only: no Edit/Write tools.
     for read_only in ["code-reviewer", "skeptic-verifier", "test-runner", "researcher"]:
@@ -211,3 +214,34 @@ def test_claude_kit_never_replaces_existing_settings(tmp_path):
 
     assert existing.read_text(encoding="utf-8") == '{"permissions": {}}'
     assert (tmp_path / ".claude" / "settings.json.template").is_file()
+
+
+def test_stop_gate_reports_malformed_check_entry_instead_of_crashing(tmp_path):
+    (tmp_path / ".claude").mkdir()
+    (tmp_path / ".claude" / "stop-gate.json").write_text(
+        json.dumps({"checks": ["not-an-object", {"name": "ok", "command": "true"}]}),
+        encoding="utf-8",
+    )
+
+    result = run_hook("stop_gate.py", {"cwd": str(tmp_path), "stop_hook_active": False}, tmp_path)
+    assert result.returncode == 0
+    output = json.loads(result.stdout)
+    assert output["decision"] == "block"
+    assert "invalid entry" in output["reason"]
+
+
+def test_learn_gate_marker_is_scoped_per_project(tmp_path):
+    session = f"test-{uuid.uuid4().hex}"
+    for project in ["proj_a", "proj_b"]:
+        root = tmp_path / project
+        root.mkdir()
+        transcript = root / "transcript.jsonl"
+        transcript.write_text("{}\n" * 100, encoding="utf-8")
+        event = {
+            "cwd": str(root),
+            "stop_hook_active": False,
+            "session_id": session,
+            "transcript_path": str(transcript),
+        }
+        result = run_hook("learn_gate.py", event, root, project_dir=root)
+        assert json.loads(result.stdout)["decision"] == "block", f"gate did not fire in {project}"

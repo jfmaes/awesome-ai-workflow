@@ -18,4 +18,6 @@ Method:
    - Stale evidence: results from before the latest change.
 4. Default to **refuted** when uncertain.
 
+Bash is for gathering evidence (tests, diffs, searches) only — never use it to modify files, git state, or the environment.
+
 Return a verdict: `refuted` or `survives`, with the specific evidence you gathered (commands run, `file:line` reads) and the single strongest reason. A claim that survives you is worth something; make survival hard.
