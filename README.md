@@ -1,12 +1,31 @@
 # Awesome AI Workflow
 
-**The one-command entrypoint for serious agentic development.** A portable skill + starter kit that gives any repo — new or existing, Claude Code or Codex or any AGENTS.md harness — a production-grade agentic workflow: risk-tiered ceremony, enforced verification, anti-slop gates, multi-agent orchestration patterns, context-rot defenses, and a compounding loop that makes the setup smarter every session.
+**Next-gen agentic development scaffolding — one command, any repo, any harness.** A portable skill + starter kit that gives any repo — new or existing, Claude Code or Codex or any AGENTS.md harness — a production-grade agentic workflow: risk-tiered ceremony, enforced verification, anti-slop gates, multi-agent orchestration patterns, context-rot defenses, and a compounding loop that makes the setup smarter every session.
 
 ```bash
 python3 ultimate-agentic-workflow/scripts/setup.py --project-root .
 ```
 
 That's it. It audits your repo read-only, shows exactly what it will create, asks once, and writes. Nothing is ever overwritten. (Command shown for a repo clone; installed as a plugin or skill, replace `ultimate-agentic-workflow/` with your install's skill directory — every script works from any location.)
+
+## v2: The Next-Generation Rework
+
+This is a ground-up rework of the original skill — not a polish pass. v1 was a workflow *document*: good advice an agent could follow or silently skip. v2 is a workflow *system*: the advice became mechanisms, the mechanisms became enforceable, and the whole thing was rebuilt from primary sources and battle-tested by adversarial multi-agent review before shipping.
+
+What makes v2 better:
+
+| | v1 | v2 |
+| --- | --- | --- |
+| **Enforcement** | Prose asking agents to verify before claiming done | A Stop-hook gate that makes stopping *impossible* while your checks fail — and a preflight that verifies the gate is actually wired, not just installed |
+| **Entrypoint** | Copy files, read a 1,100-line manual | One guided command (`setup.py`), or `/plugin install` in Claude Code; brownfield-safe with `--stdout` merge and `--skip-existing` |
+| **Traceability** | Four overlapping ledgers that could drift apart | One traceability matrix + one verification ledger, with an explicit canonical state file per tier and a `verify_run.py` gate |
+| **Subagents** | None | Five tool-restricted roles — reviewers and verifiers that *cannot* edit the code they judge — designed to compose with Superpowers and GSD, not compete |
+| **Orchestration & context** | Not covered | `orchestration.md` (fan-out economics, packet contracts, model tiering, judge panels, loop stop conditions) and `context-engineering.md` (compaction survival, subagent isolation), grounded in Anthropic's primary engineering guidance |
+| **Slop** | Implicit taste | An explicit minimalism ladder with a safety carve-out, plus a slop taxonomy for code, tests, prose, and artifacts |
+| **Compounding** | Static instructions | `/retro` + `/mint-skill` + an optional learning gate: every session can leave the repo's agentic setup smarter than it found it |
+| **Ecosystem** | Isolated | Preflight detects and recommends proven frameworks (Superpowers, GSD's successor) with exact install commands; `meta.md` maps what to steal from where |
+| **Reach** | Codex-first, single install path | Claude Code (plugin/skill), Codex, and every AGENTS.md harness (OpenCode, Cursor, Gemini CLI); all scripts run from clone, skills dir, or plugin cache |
+| **Quality bar** | Phrase-matching tests | 64 behavioral tests; four adversarial multi-agent review rounds (50+ reviewer/skeptic agents) with every confirmed finding fixed and regression-tested |
 
 ## Why Use This
 
@@ -188,7 +207,7 @@ git diff --check                                                # whitespace
 
 ## Changelog
 
-### 2026-07-04 — v2: the starter-kit rebuild
+### 2026-07-04 — v2: the next-generation rework
 
 - **One-command entrypoint**: `setup.py` (guided, never overwrites), plugin
   packaging (`/plugin marketplace add jfmaes/awesome-ai-workflow`), and a
