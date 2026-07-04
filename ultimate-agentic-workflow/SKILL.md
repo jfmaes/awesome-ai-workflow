@@ -1,6 +1,6 @@
 ---
 name: ultimate-agentic-workflow
-description: Routes AI coding work by risk tier (T0-T3) and enforces traceability, verification, and anti-slop discipline. Use when initializing or scaffolding a repo for AI coding (AGENTS.md/CLAUDE.md bootloaders, .claude starter kit with subagents/hooks/skills), classifying task ceremony, orchestrating subagents or parallel work, running goal loops or autonomous loops, managing context rot/compaction on long tasks, capturing session lessons, creating new skills or subagents, or producing accountable multi-step work with .workflow artifacts, verification ledgers, and fresh-context review.
+description: Routes AI coding work by risk tier (T0-T3) and enforces traceability, verification, and anti-slop discipline. Use when initializing or scaffolding a repo for AI coding (preflight readiness check, AGENTS.md/CLAUDE.md bootloaders, .claude starter kit with subagents/hooks/skills), checking or installing agent tooling and frameworks (ripgrep, Serena, Superpowers, GSD), classifying task ceremony, orchestrating subagents or parallel work, running goal loops or autonomous loops, managing context rot/compaction on long tasks, capturing session lessons, creating new skills or subagents, or producing accountable multi-step work with .workflow artifacts, verification ledgers, and fresh-context review.
 ---
 
 # Ultimate Agentic Workflow
@@ -8,6 +8,16 @@ description: Routes AI coding work by risk tier (T0-T3) and enforces traceabilit
 ## Overview
 
 Use this skill as the routing and accountability layer for AI coding. Keep always-loaded repo instructions tiny; load detailed workflow guidance only when tier and risk justify it.
+
+## Preflight
+
+For any repo — new or existing — start with the read-only readiness check:
+
+```bash
+python3 ultimate-agentic-workflow/scripts/preflight.py --project-root .
+```
+
+It reports repo and bootloader state, `.claude` kit presence, tool availability (ripgrep, Serena, ast-grep, ...), and whether proven frameworks are installed (the Superpowers plugin; GSD, whose original repo is archived — successor `open-gsd/gsd-core`), then prints an ordered next-steps list with exact commands. It executes nothing beyond read-only listings; every install stays approval-first. Prefer installing Superpowers over reimplementing its behavior skills — this kit's hooks, gates, and verifier agents complement it, they do not replace it.
 
 ## Initialize Agent Files
 
@@ -24,7 +34,7 @@ The script detects the project's ecosystem (Node/pnpm/yarn/bun, Python, Rust, Go
 - `AGENTS.md` (Codex bootloader) and/or `CLAUDE.md` (Claude Code bootloader)
 - `OPS.md` (shared operational guide)
 
-It checks every target path first and refuses to overwrite unless `--force` is given — a failed run writes nothing.
+It checks every target path first and refuses to overwrite unless `--force` is given — a failed run writes nothing. For existing repos with their own `CLAUDE.md`/`AGENTS.md`, use `--stdout` to print the rendered files and merge manually instead of overwriting.
 
 ## Tier Decision
 

@@ -37,7 +37,7 @@ compounds, and still asks before installing dependencies, editing `.codex` or
   with ecosystem detection (Node/pnpm/yarn/bun, Python, Rust, Go, Maven,
   Gradle, Ruby) — plus `--claude-kit` to install the `.claude/` starter kit.
 - **The `.claude/` starter kit**: five focused subagents (code-reviewer,
-  skeptic-verifier, test-runner, researcher, worktree-isolated implementer), a
+  skeptic-verifier, test-runner, researcher, implementer), a
   deterministic stop-gate hook that blocks completion while checks fail, an
   optional once-per-session learning gate, `/retro` (session lessons ->
   durable improvements) and `/mint-skill` (new skills/subagents with tuned
@@ -96,6 +96,26 @@ ultimate-agentic-workflow/
 tests/
 README.md
 ```
+
+## Quick Start (any repo, new or existing)
+
+```bash
+# 1. See exactly what's present, what's missing, and what to run next (read-only):
+python3 ultimate-agentic-workflow/scripts/preflight.py --project-root .
+
+# 2. Bootstrap agent files + the .claude kit (refuses to overwrite anything):
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --project-root .
+
+# Existing CLAUDE.md/AGENTS.md? Print the rendered files and merge by hand instead:
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --stdout --project-root .
+```
+
+The preflight also checks that core tools are usable (ripgrep, Serena, ast-grep,
+uv) and whether proven frameworks are installed — the Superpowers plugin
+(`/plugin install superpowers@claude-plugins-official`) and GSD (original repo
+archived; successor `npx @opengsd/gsd-core@latest`) — and prints install
+commands for anything missing. It installs nothing itself; every install is
+approval-first.
 
 ## Install The Skill
 

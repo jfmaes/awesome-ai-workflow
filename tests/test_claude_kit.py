@@ -41,13 +41,21 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
     raise AssertionError(f"{path.name} frontmatter never closed")
 
 
-def run_hook(script: str, event: dict, cwd: Path) -> subprocess.CompletedProcess:
+def run_hook(script: str, event: dict, cwd: Path, project_dir: Path | None = None) -> subprocess.CompletedProcess:
+    import os
+
+    env = {**os.environ}
+    if project_dir is None:
+        env.pop("CLAUDE_PROJECT_DIR", None)  # isolate from the test runner's own session
+    else:
+        env["CLAUDE_PROJECT_DIR"] = str(project_dir)
     return subprocess.run(
         [sys.executable, str(HOOKS / script)],
         input=json.dumps(event),
         text=True,
         capture_output=True,
         cwd=cwd,
+        env=env,
     )
 
 
@@ -105,6 +113,32 @@ def test_stop_gate_blocks_on_failing_check_and_respects_active_flag(tmp_path):
     result = run_hook("stop_gate.py", {"cwd": str(tmp_path), "stop_hook_active": True}, tmp_path)
     assert result.returncode == 0
     assert result.stdout.strip() == ""
+
+
+def test_stop_gate_anchors_on_claude_project_dir_not_session_cwd(tmp_path):
+    (tmp_path / ".claude").mkdir()
+    (tmp_path / ".claude" / "stop-gate.json").write_text(
+        json.dumps({"checks": [{"name": "boom", "command": "exit 1"}]}), encoding="utf-8"
+    )
+    elsewhere = tmp_path / "some" / "subdir"
+    elsewhere.mkdir(parents=True)
+
+    # Session drifted into a subdirectory via cd; the gate must still find the
+    # project-root config through CLAUDE_PROJECT_DIR.
+    result = run_hook(
+        "stop_gate.py",
+        {"cwd": str(elsewhere), "stop_hook_active": False},
+        cwd=elsewhere,
+        project_dir=tmp_path,
+    )
+    assert result.returncode == 0
+    assert json.loads(result.stdout)["decision"] == "block"
+
+
+def test_settings_template_hook_command_uses_project_dir_anchor():
+    settings = json.loads((KIT / "settings.json.template").read_text(encoding="utf-8"))
+    command = settings["hooks"]["Stop"][0]["hooks"][0]["command"]
+    assert "CLAUDE_PROJECT_DIR" in command
 
 
 def test_stop_gate_allows_stop_when_checks_pass(tmp_path):

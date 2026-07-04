@@ -27,9 +27,11 @@ Installed to `.claude/agents/`. Each is deliberately narrow; delegation is drive
 | `skeptic-verifier` | Adversarially refutes "done" claims and load-bearing findings | read-only + Bash |
 | `test-runner` | Runs checks, absorbs verbose output, returns failures only (haiku-class) | read-only + Bash |
 | `researcher` | Bounded read-only discovery with `file:line` evidence | read-only + web |
-| `implementer` | One approved task, TDD, worktree-isolated, disjoint write scope | full, isolated |
+| `implementer` | One approved task, TDD, disjoint write scope | full |
 
 These map onto the execution modes in `workflow.md` and the patterns in `orchestration.md`: implementer + code-reviewer + skeptic-verifier is subagent-driven development with fresh-context review; test-runner and researcher are context-isolation workers.
+
+Worktree isolation for parallel implementers is the dispatcher's job: create the worktree (`git worktree add`) and name it in the packet before dispatch. The implementer's rules tell it to refuse parallel edits without one. (Frontmatter-level isolation fields are not portable across Claude Code versions, so the kit does not rely on them.)
 
 ## Hooks
 
@@ -51,8 +53,10 @@ Use it for anything a script can verify exactly. This converts "the agent should
 **`learn_gate.py` — optional learning gate.** Not wired by default. Once per substantive session, it blocks the first stop and asks the agent to run the `/retro` skill, so lessons get captured before the session ends instead of never. (Original implementation of the session-learning concept popularized by the community `/teach` and `/reflect` skills and compound engineering's `/compound` step.) Enable it by adding a second Stop entry to `.claude/settings.json`:
 
 ```json
-{"type": "command", "command": "python3 .claude/hooks/learn_gate.py"}
+{"type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/learn_gate.py\""}
 ```
+
+(Hook commands run from the session's current directory, which drifts when the agent uses `cd` — always anchor hook paths on `CLAUDE_PROJECT_DIR`, as the shipped template does.)
 
 ## Skills
 

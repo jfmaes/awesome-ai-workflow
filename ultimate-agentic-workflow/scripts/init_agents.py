@@ -172,6 +172,9 @@ def plan_claude_kit(root: Path) -> dict[Path, str]:
         if not source.is_file():
             continue
         relative = source.relative_to(CLAUDE_KIT_DIR)
+        # Skip dev artifacts that can appear next to the hook scripts.
+        if "__pycache__" in relative.parts or relative.suffix == ".pyc":
+            continue
         if relative.name == "settings.json.template":
             # Never replace an existing settings.json; leave the template
             # alongside for a manual merge instead.
@@ -216,6 +219,11 @@ def main() -> int:
         action="store_true",
         help="Also install the .claude/ starter kit (subagents, hooks, skills, settings).",
     )
+    parser.add_argument(
+        "--stdout",
+        action="store_true",
+        help="Print the rendered files instead of writing them (for merging into existing repos).",
+    )
     args = parser.parse_args()
 
     root = Path(args.project_root).resolve()
@@ -226,6 +234,11 @@ def main() -> int:
     files = plan_files(args.cli, root, context)
     if args.claude_kit:
         files.update(plan_claude_kit(root))
+    if args.stdout:
+        for path, content in files.items():
+            print(f"===== {path.relative_to(root)} =====")
+            print(content)
+        return 0
     write_files(files, args.force)
     return 0
 

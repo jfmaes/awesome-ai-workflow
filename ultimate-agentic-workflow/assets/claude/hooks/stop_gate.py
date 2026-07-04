@@ -25,6 +25,7 @@ command instead — this gate is for checks a script can verify exactly.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -32,8 +33,13 @@ from pathlib import Path
 TAIL_LINES = 15
 
 
-def read_config(cwd: Path) -> dict:
-    config_path = cwd / ".claude" / "stop-gate.json"
+def project_root(event: dict) -> Path:
+    """The session cwd drifts with `cd`; CLAUDE_PROJECT_DIR stays anchored."""
+    return Path(os.environ.get("CLAUDE_PROJECT_DIR") or event.get("cwd") or ".")
+
+
+def read_config(root: Path) -> dict:
+    config_path = root / ".claude" / "stop-gate.json"
     if not config_path.is_file():
         return {}
     try:
@@ -72,8 +78,8 @@ def main() -> int:
     if event.get("stop_hook_active"):
         return 0
 
-    cwd = Path(event.get("cwd") or ".")
-    config = read_config(cwd)
+    root = project_root(event)
+    config = read_config(root)
     checks = config.get("checks") or []
     if not checks:
         return 0
@@ -85,7 +91,7 @@ def main() -> int:
         command = check.get("command")
         if not command:
             continue
-        passed, detail = run_check(str(command), cwd, timeout)
+        passed, detail = run_check(str(command), root, timeout)
         if not passed:
             failures.append(f"[{name}] `{command}` failed:\n{detail}")
 
