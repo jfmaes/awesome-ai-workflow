@@ -1,0 +1,13 @@
+{
+  "name": "awesome-ai-workflow",
+  "owner": {
+    "name": "jfmaes"
+  },
+  "plugins": [
+    {
+      "name": "ultimate-agentic-workflow",
+      "source": "./ultimate-agentic-workflow",
+      "description": "Tiered agentic workflow with traceability, anti-slop gates, orchestration/context-engineering guidance, preflight readiness check, and a .claude starter kit."
+    }
+  ]
+}

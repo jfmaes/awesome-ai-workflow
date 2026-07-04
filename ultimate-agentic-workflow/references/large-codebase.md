@@ -1,5 +1,17 @@
 # Large Codebase Acceleration
 
+## Contents
+
+- Search Modality Routing
+- Large-Repo Intake Checklist
+- Adaptive Tool Readiness
+- Tool Install Catalog
+- Context-Budget Policy
+- Serena Integration
+- Semantic Search
+- Permission-Gated Setup
+- Sources
+
 Use this reference only when the repo is large, unfamiliar, polyglot, or the task needs cross-file navigation. Keep the main agent first: it owns requirements, decisions, risk, integration, and final verification. Helper tools and subagents only narrow search space and return concise findings with `file:line` evidence.
 
 ## Search Modality Routing
@@ -27,7 +39,7 @@ Do not read broad files just because a search returns many hits. Narrow first, t
 When a repo looks large, unfamiliar, polyglot, or cross-file navigation heavy, run the read-only readiness check before adding tools:
 
 ```bash
-python3 ultimate-agentic-workflow/scripts/large_codebase_tools.py --project-root . --json
+python3 <skill-dir>/scripts/large_codebase_tools.py --project-root . --json
 ```
 
 The script:
@@ -43,7 +55,7 @@ The agent should read the JSON, decide whether the task actually needs the missi
 
 ## Tool Install Catalog
 
-These commands are documentation and approval-plan inputs. Do not run them until the user approves the exact commands and write/network targets.
+These commands are documentation and approval-plan inputs. Do not run them until the user approves the exact commands and write/network targets. The authoritative machine-readable catalog is `TOOL_CATALOG` in `scripts/large_codebase_tools.py`; if this table and the script disagree, trust the script.
 
 | Tool | Use When | Install / Setup |
 | --- | --- | --- |
@@ -57,11 +69,10 @@ These commands are documentation and approval-plan inputs. Do not run them until
 
 ## Context-Budget Policy
 
-- The main agent keeps decisions, requirement IDs, risk state, and verification claims.
-- Exploration helpers get bounded questions and return summaries with `file:line` refs, not raw logs.
+The general policy (who keeps what, bounded questions in, `file:line` summaries out) lives in `context-engineering.md`. Specific to large repos:
+
 - Prefer `rg` output, symbol summaries, and line-scoped reads before full-file reads.
 - Do not load MCP servers or semantic indexes by default. Add them only when the routing table says they are useful.
-- If a tool emits noisy output, summarize into the source ledger and discard the raw output unless it is needed as evidence.
 
 ## Serena Integration
 

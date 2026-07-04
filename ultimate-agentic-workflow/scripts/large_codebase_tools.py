@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -159,25 +160,25 @@ TOOL_CATALOG: dict[str, dict[str, list[str] | str]] = {
 }
 
 
-def should_skip(path: Path) -> bool:
-    return any(part in IGNORED_DIRS for part in path.parts)
-
-
 def collect_project_signals(root: Path, large_file_threshold: int) -> dict:
     file_count = 0
     source_file_count = 0
     language_counts: dict[str, int] = {}
 
-    for path in root.rglob("*"):
-        if should_skip(path.relative_to(root)):
-            continue
-        if not path.is_file():
-            continue
-        file_count += 1
-        language = LANGUAGE_BY_SUFFIX.get(path.suffix.lower())
-        if language:
-            source_file_count += 1
-            language_counts[language] = language_counts.get(language, 0) + 1
+    # Prune ignored directories during the walk instead of filtering after the
+    # fact, so huge node_modules/vendor trees are never descended into.
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name not in IGNORED_DIRS]
+        for filename in filenames:
+            # os.walk yields dangling symlinks as "files"; keep rglob's
+            # is_file() semantics and skip them.
+            if not (Path(dirpath) / filename).is_file():
+                continue
+            file_count += 1
+            language = LANGUAGE_BY_SUFFIX.get(Path(filename).suffix.lower())
+            if language:
+                source_file_count += 1
+                language_counts[language] = language_counts.get(language, 0) + 1
 
     monorepo_dirs = [
         name
@@ -248,6 +249,9 @@ def check_tools(command_resolver: Callable[[list[str]], str | None] = default_co
         commands = list(metadata.get("commands", []))
         path = command_resolver(commands) if commands else None
         statuses[name] = {
+            # Hosted/MCP tools without a local binary cannot be detected via
+            # PATH; mark them uncheckable instead of implying "checked, absent".
+            "checkable": bool(commands),
             "installed": bool(path),
             "path": path,
             "version": command_version(path) if path else None,
@@ -357,7 +361,12 @@ def print_human(report: dict) -> None:
     print()
     print("Tool status")
     for name, status in report["tools"].items():
-        installed = "installed" if status["installed"] else "missing"
+        if not status["checkable"]:
+            installed = "not PATH-checkable (hosted/MCP tool)"
+        elif status["installed"]:
+            installed = "installed"
+        else:
+            installed = "missing"
         version = f" ({status['version']})" if status["version"] else ""
         print(f"- {name}: {installed}{version}")
     print()
@@ -383,7 +392,11 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    report = build_report(Path(args.project_root), args.large_file_threshold)
+    root = Path(args.project_root)
+    if not root.is_dir():
+        raise SystemExit(f"Project root does not exist or is not a directory: {root}")
+
+    report = build_report(root, args.large_file_threshold)
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:

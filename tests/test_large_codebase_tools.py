@@ -38,8 +38,26 @@ def test_large_project_recommends_serena_when_missing(tmp_path):
     assert report["project"]["large_codebase"] is True
     assert "file-count-threshold" in report["project"]["large_codebase_reasons"]
     assert report["tools"]["serena"]["installed"] is False
+    assert report["tools"]["serena"]["checkable"] is True
+    # Hosted MCP tools have no local binary; the report must not imply
+    # "checked PATH and absent".
+    assert report["tools"]["warpgrep"]["checkable"] is False
     assert report["recommendations"]["serena"]["action"] == "ask-to-install"
     assert "May I install/configure Serena" in report["approval_requests"][0]["prompt"]
+
+
+def test_ignored_directories_are_pruned_from_signals(tmp_path):
+    make_repo(tmp_path, 3)
+    vendored = tmp_path / "node_modules" / "dep"
+    vendored.mkdir(parents=True)
+    for index in range(50):
+        (vendored / f"mod_{index}.js").write_text("module.exports = 1\n", encoding="utf-8")
+    module = load_module()
+
+    signals = module.collect_project_signals(tmp_path, large_file_threshold=1000)
+
+    assert signals["file_count"] == 3
+    assert "javascript" not in signals["languages"]
 
 
 def test_tool_catalog_documents_install_instructions_for_identified_tools():
@@ -92,3 +110,24 @@ def test_cli_json_reports_missing_serena_permission_request(tmp_path):
     assert all(not command.startswith("or ") for command in report["approval_requests"][0]["commands"])
     assert report["approval_requests"][0]["writes"]
     assert "No commands were executed" in report["safety"]
+
+
+def test_dangling_symlinks_are_not_counted(tmp_path):
+    make_repo(tmp_path, 2)
+    (tmp_path / "src" / "broken.py").symlink_to(tmp_path / "does-not-exist.py")
+    module = load_module()
+
+    signals = module.collect_project_signals(tmp_path, large_file_threshold=1000)
+
+    assert signals["file_count"] == 2
+
+
+def test_cli_rejects_nonexistent_project_root(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--project-root", str(tmp_path / "nope"), "--json"],
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode != 0
+    assert "does not exist" in result.stderr
