@@ -1,101 +1,29 @@
 # Awesome AI Workflow
 
-A compact, installable workflow skill for AI coding agents that should move
-fast without losing traceability, review discipline, or permission boundaries.
+**The one-command entrypoint for serious agentic development.** A portable skill + starter kit that gives any repo — new or existing, Claude Code or Codex or any AGENTS.md harness — a production-grade agentic workflow: risk-tiered ceremony, enforced verification, anti-slop gates, multi-agent orchestration patterns, context-rot defenses, and a compounding loop that makes the setup smarter every session.
 
-This repository contains the `ultimate-agentic-workflow` skill. It uses a
-small bootloader model instead of a large always-loaded instruction file:
-
-```text
-AGENTS.md / CLAUDE.md -> short repo instructions (bootloader)
-OPS.md -> operational guide: commands, validation, durable lessons
-.claude/ -> optional starter kit: subagents, hooks, skills, settings
-ultimate-agentic-workflow/SKILL.md -> routing and accountability rules
-references/workflow.md -> detailed lifecycle manual
-references/orchestration.md -> subagents, fan-out, verification patterns, loops
-references/context-engineering.md -> context budgets, durable notes, compaction survival
-references/anti-slop.md -> minimalism ladder and slop taxonomy
-references/claude-code-kit.md -> the installable .claude/ kit and goal loops
-references/meta.md -> minting new skills/subagents/hooks; ecosystem map
-references/large-codebase.md -> search routing and permission-gated tooling
-references/pilot-measurement.md -> measure tools before trusting them
-.workflow/<slug>/ -> durable run evidence for high-risk work
+```bash
+python3 ultimate-agentic-workflow/scripts/setup.py --project-root .
 ```
 
-The goal is an agent-first workflow: the agent classifies task risk, loads only
-the guidance it needs, orchestrates subagents only where fan-out pays for
-itself, verifies with fresh-context reviewers, captures lessons so the repo
-compounds, and still asks before installing dependencies, editing `.codex` or
-`.claude`, or cloning external repositories.
+That's it. It audits your repo read-only, shows exactly what it will create, asks once, and writes. Nothing is ever overwritten.
 
-## What It Gives You
+## Why Use This
 
-- Tiny bootloader templates instead of giant always-loaded instruction files.
-- T0-T3 task routing so a typo fix and a multi-session refactor do not use the
-  same process.
-- A deterministic `init_agents.py` bootstrap for Codex, Claude Code, or both,
-  with ecosystem detection (Node/pnpm/yarn/bun, Python, Rust, Go, Maven,
-  Gradle, Ruby) — plus `--claude-kit` to install the `.claude/` starter kit.
-- **The `.claude/` starter kit**: five focused subagents (code-reviewer,
-  skeptic-verifier, test-runner, researcher, implementer), a
-  deterministic stop-gate hook that blocks completion while checks fail, an
-  optional once-per-session learning gate, `/retro` (session lessons ->
-  durable improvements) and `/mint-skill` (new skills/subagents with tuned
-  trigger descriptions), and a settings template with safe defaults.
-- One canonical state owner per tier, a single traceability matrix schema, and
-  a verification ledger that final claims must cite.
-- Anti-slop discipline: a minimalism ladder with a safety carve-out, and a
-  slop taxonomy for code, tests, prose, and artifacts.
-- Multi-agent orchestration guidance: fan-out sizing, structured packet
-  results, model tiering, adversarial and fresh-context verification, judge
-  panels, and machine-checkable loop stop conditions.
-- Context engineering guidance against context rot: just-in-time retrieval,
-  durable notes that survive compaction, and subagent context isolation.
-- Goal-loop guidance: deterministic stop gates for exact conditions, the
-  built-in `/goal` for judgment conditions, autonomous loops for batch work.
-- A compounding loop (`references/meta.md`) that tells the agent when to mint
-  a new skill, subagent, or hook — with an ecosystem map (Superpowers,
-  Ponytail, Headroom, compound engineering, Beads, teach) so it builds on
-  proven patterns instead of reinventing them.
-- `verify_run.py` as a deterministic gate for T3 run directories.
-- Large-codebase readiness checks and permission-gated setup for Serena,
-  ripgrep, ast-grep, grepai, Ollama, and WarpGrep/Morph.
-- A pilot protocol for measuring whether acceleration tools actually improve
-  outcomes before making them default-on.
+Agentic coding fails in predictable ways. Each one gets a mechanism here — not a paragraph of advice, a *mechanism*:
 
-## Repository Layout
+| Pain point | What this repo does about it |
+| --- | --- |
+| **Agents claim "done" when it isn't** | A deterministic Stop-hook gate: the agent *cannot end its turn* while your tests/lint fail. Plus a read-only `skeptic-verifier` subagent whose only job is to refute completion claims. |
+| **Slop** — filler comments, dead abstractions, gamed tests, flattering summaries | `anti-slop.md`: a 7-rung minimalism ladder (with a hard safety carve-out), and a slop taxonomy for code, tests, prose, and artifacts that reviews are run against. |
+| **Context rot on long tasks** | `context-engineering.md`: just-in-time retrieval, durable notes that survive compaction, subagent context isolation with distilled 1-2k-token returns. |
+| **No traceability** — what was asked, decided, verified? | T0-T3 tiers with one canonical state file per tier, a requirement traceability matrix, and a verification ledger that final claims must cite. Validated by `verify_run.py`, not by promises. |
+| **Multi-agent chaos or waste** | `orchestration.md`: when fan-out pays (~15x token cost — usually discovery/review/verification, *not* authoring), sizing tables, structured packet contracts, model tiering, judge panels, loop-until-dry. |
+| **Goal loops that never terminate or terminate early** | Deterministic conditions → the stop gate. Judgment conditions → the built-in `/goal`. Batch loops → machine-checkable stop conditions, circuit breakers, budget caps. |
+| **Every session relearns the same lessons** | `/retro` mines each session for durable lessons and routes them to the right home; `/mint-skill` turns repeated workflows into new skills/subagents with tuned trigger descriptions; an optional learning gate fires `/retro` once per session automatically. |
+| **Reinventing what the ecosystem already solved** | The preflight detects and recommends proven frameworks (Superpowers plugin, GSD's successor) with exact install commands, and `meta.md` maps the ecosystem (Ponytail, Headroom, Beads, compound engineering) so you steal ideas instead of rebuilding them. |
 
-```text
-ultimate-agentic-workflow/
-|-- SKILL.md
-|-- agents/openai.yaml
-|-- scripts/
-|   |-- init_agents.py
-|   |-- large_codebase_tools.py
-|   `-- verify_run.py
-|-- assets/
-|   |-- templates/
-|   |   |-- BOOTLOADER.md.template
-|   |   `-- OPS.md.template
-|   `-- claude/
-|       |-- agents/          # code-reviewer, skeptic-verifier, test-runner,
-|       |                    # researcher, implementer
-|       |-- hooks/           # stop_gate.py, learn_gate.py
-|       |-- skills/          # retro/, mint-skill/
-|       `-- settings.json.template
-`-- references/
-    |-- workflow.md
-    |-- orchestration.md
-    |-- context-engineering.md
-    |-- anti-slop.md
-    |-- claude-code-kit.md
-    |-- meta.md
-    |-- large-codebase.md
-    `-- pilot-measurement.md
-
-tests/
-README.md
-```
+Grounded, not vibes: built from Anthropic's primary engineering guidance (context engineering, the multi-agent research system, skill authoring), reviewed by adversarial multi-agent passes whose skeptic verifiers reproduced every reported bug before it was fixed, and covered by 57 behavioral tests.
 
 ## Quick Start (any repo, new or existing)
 
@@ -124,6 +52,13 @@ uv) and whether proven frameworks are installed — the Superpowers plugin
 archived; successor `npx @opengsd/gsd-core@latest`) — and prints install
 commands for anything missing. It installs nothing itself; every install is
 approval-first.
+
+### What you get after setup
+
+- `AGENTS.md` / `CLAUDE.md`: tiny always-loaded bootloaders with your repo's detected build/test/lint commands (Node incl. pnpm/yarn/bun, Python, Rust, Go, Maven, Gradle, Ruby).
+- `OPS.md`: the shared operational guide where durable repo lessons accumulate.
+- `.claude/`: five focused subagents (`code-reviewer`, `skeptic-verifier`, `test-runner`, `researcher`, `implementer`), the stop-gate and learning-gate hooks, `/retro` + `/mint-skill` skills, and a settings template with safe defaults.
+- Then configure the gate: put your test/lint commands in `.claude/stop-gate.json` and the agent literally cannot claim completion while they fail.
 
 ## Install The Skill
 
@@ -156,6 +91,15 @@ Start a new agent session and invoke it, e.g.:
 Use ultimate-agentic-workflow to initialize this repo for accountable AI coding.
 ```
 
+## For AI Agents
+
+If you are an agent reading this: the entrypoint is `ultimate-agentic-workflow/SKILL.md`. It is the router — read it first, then load references on demand (they are all exactly one level deep from it). Conventions you need:
+
+- `<skill-dir>` in any documented command means the directory containing `SKILL.md` — a repo clone (`ultimate-agentic-workflow/`), a skills-directory install, or the plugin cache. All scripts work from any of them.
+- Classify every task T0-T3 before acting; ceremony scales with risk, and the tier's canonical state file is defined in `references/workflow.md` → State Ownership.
+- Never claim completion without a fresh verification-ledger row. Never present self-review as independent review.
+- Run `python3 <skill-dir>/scripts/preflight.py --project-root .` before proposing setup changes; everything that installs or mutates config requires user approval with exact commands, write targets, risks, and rollback.
+
 ## Harness Support
 
 | Piece | Claude Code | Codex | OpenCode / Cursor / Gemini CLI / other AGENTS.md harnesses |
@@ -172,34 +116,6 @@ necessity; everything else — the tiers, ledgers, orchestration patterns,
 context rules, and anti-slop gates — travels with any harness that can read
 markdown and run Python.
 
-## Initialize A Target Repo
-
-The bootstrap script detects the project's ecosystem and writes short agent
-files. Filenames have fixed roles across CLIs, so initializing both on one
-repo is safe:
-
-| File | Role |
-| --- | --- |
-| `AGENTS.md` | Codex bootloader |
-| `CLAUDE.md` | Claude Code bootloader |
-| `OPS.md` | Shared operational guide |
-
-```bash
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli codex --project-root /path/to/repo
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --project-root /path/to/repo
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --project-root /path/to/repo
-```
-
-Add `--claude-kit` to also install the `.claude/` starter kit (subagents,
-hooks, skills, settings template) into the target repo — see
-`references/claude-code-kit.md` for what each piece does and how to enable
-the optional learning gate.
-
-The script checks every target path before writing anything; if any target
-exists it refuses and writes nothing unless `--force` is passed. An existing
-`.claude/settings.json` is never replaced — the template is written alongside
-it for manual merge.
-
 ## Task Tiers
 
 | Tier | Use when | Expected process |
@@ -213,51 +129,40 @@ Escalate when work touches security, production data, secrets, migrations,
 deployments, broad edits, ambiguous requirements, large unfamiliar codebases,
 subagents, loops, or multi-session execution.
 
-## Orchestration And Context
+## Repository Layout
 
-`references/orchestration.md` covers when multi-agent fan-out pays for itself
-(discovery, review, verification) and when it hurts (most code authoring), how
-to size fan-out, the structured packet contract workers must return, model and
-reasoning-effort tiering, adversarial verification patterns, and stop
-conditions for autonomous loops.
+```text
+ultimate-agentic-workflow/
+|-- SKILL.md                     # the router — agents start here
+|-- .claude-plugin/plugin.json   # plugin manifest
+|-- agents/openai.yaml
+|-- scripts/
+|   |-- setup.py                 # one-command guided setup
+|   |-- preflight.py             # read-only readiness audit
+|   |-- init_agents.py           # deterministic bootstrap (+ --claude-kit, --stdout)
+|   |-- verify_run.py            # T3 run-directory gate
+|   `-- large_codebase_tools.py  # tool readiness for big repos
+|-- assets/
+|   |-- templates/               # BOOTLOADER.md, OPS.md
+|   `-- claude/                  # the installable .claude/ kit
+|       |-- agents/              # code-reviewer, skeptic-verifier, test-runner,
+|       |                        # researcher, implementer
+|       |-- hooks/               # stop_gate.py, learn_gate.py
+|       |-- skills/              # retro/, mint-skill/
+|       `-- settings.json.template
+`-- references/
+    |-- workflow.md              # T0-T3 lifecycle, ledgers, state ownership
+    |-- orchestration.md         # fan-out, packets, verification patterns, loops
+    |-- context-engineering.md   # context budgets, compaction survival
+    |-- anti-slop.md             # minimalism ladder, slop taxonomy
+    |-- claude-code-kit.md       # the kit, goal loops
+    |-- meta.md                  # minting skills/subagents, ecosystem map
+    |-- large-codebase.md        # search routing, permission-gated tooling
+    `-- pilot-measurement.md     # measure tools before trusting them
 
-`references/context-engineering.md` covers context budgets, just-in-time
-retrieval, durable notes that survive compaction, and subagent context
-isolation.
-
-## Large-Codebase Readiness
-
-For large, unfamiliar, polyglot, or cross-file-heavy repositories, run the
-read-only readiness checker before adding search or MCP tooling:
-
-```bash
-python3 ultimate-agentic-workflow/scripts/large_codebase_tools.py --project-root . --json
+.claude-plugin/marketplace.json  # makes this repo /plugin-installable
+tests/                           # 57 behavioral tests
 ```
-
-It reports repo shape and language signals, installed/missing tool status,
-recommendations, and drafts approval-request text when a missing tool appears
-useful. It installs nothing, edits no config, and only inspects the repo and
-`PATH`. Search routing (`rg` -> symbol -> structural -> semantic) and the tool
-catalog live in `references/large-codebase.md`.
-
-## Permission-Gated Setup
-
-Agents may prepare setup commands autonomously, but must ask before executing
-anything that mutates `.codex`, `.claude`, `.mcp.json`, home/global MCP config,
-package-manager caches, external GitHub checkouts, or files outside the
-workspace. Approval requests must include exact commands, write targets,
-network/data risks, credentials required, and rollback steps.
-
-Default clone location for dependent repositories is
-`.workflow/deps/<owner>-<repo>/` unless the user chooses another location.
-
-## Pilot Measurement
-
-Do not treat Serena, grepai, WarpGrep, or another acceleration tool as
-default-on until it has been measured on the target repo class. Use
-`references/pilot-measurement.md` to compare a baseline arm against a
-treatment arm and recommend default-on only when correctness holds and
-exploration cost measurably drops.
 
 ## Development
 
@@ -270,17 +175,62 @@ git diff --check                                                # whitespace
 ## Design Rules
 
 - Keep always-loaded agent files short; operational detail lives in `OPS.md`
-  or the skill references.
+  or the skill references (see `references/large-codebase.md` for search and
+  tooling policy).
 - One canonical live-state file per tier; everything else is a projection.
 - Use `.workflow/<slug>/` only when the task needs durable evidence.
 - Fan out subagents for discovery and verification, not for coupled authoring.
-- Prefer read-only readiness checks and exact approval text over silent tool
-  installs.
+- Enforcement beats memory: anything that must happen every time becomes a
+  hook or gate, not a reminder.
+- Prefer proven frameworks over reinvention; prefer read-only readiness checks
+  and exact approval text over silent installs.
 - Treat acceleration claims as hypotheses until the pilot protocol measures
   them.
 
-## Current Scope
+## Changelog
 
-This repo is intentionally small. It is not a full framework, daemon, or hosted
-service. It is a portable skill plus references, scripts, and tests that target
-agent behavior in other repositories.
+### 2026-07-04 — v2: the starter-kit rebuild
+
+- **One-command entrypoint**: `setup.py` (guided, never overwrites), plugin
+  packaging (`/plugin marketplace add jfmaes/awesome-ai-workflow`), and a
+  `<skill-dir>` convention so every documented command works from a clone,
+  a skills install, or the plugin cache.
+- **`.claude/` starter kit**: five subagents (code-reviewer, skeptic-verifier,
+  test-runner, researcher, implementer), a deterministic stop-gate Stop hook
+  (blocks completion while configured checks fail, anchored on
+  `CLAUDE_PROJECT_DIR`), an optional once-per-session learning gate, `/retro`
+  and `/mint-skill` skills, and a settings template.
+- **New references**: `orchestration.md`, `context-engineering.md`,
+  `anti-slop.md`, `meta.md`, `claude-code-kit.md` — grounded in primary
+  sources and the verified ecosystem (Superpowers, Ponytail, Headroom,
+  compound engineering, GSD, Beads, teach/reflect).
+- **Preflight + brownfield support**: read-only audit of repo state, tools,
+  and frameworks with an ordered next-steps list; `--stdout` merge path for
+  repos with existing agent files; multi-harness documentation.
+- **workflow.md overhaul**: provenance cut, four overlapping ledgers
+  consolidated into one traceability matrix + verification ledger, explicit
+  per-tier state ownership, deterministic gates, loop stop conditions.
+- **Hardened scripts**: fixed the dual-CLI `AGENTS.md` corruption bug,
+  non-object/empty `package.json` crashes, partial writes under `--force`,
+  symlink and ignored-dir handling in the readiness checker; added
+  `verify_run.py`; multi-ecosystem command detection.
+- **Tests**: phrase-presence checks replaced with 57 behavioral tests,
+  including regressions for every bug confirmed by two adversarial
+  multi-agent review passes (26 reviewer/verifier agents).
+
+### 2026-05 — v1
+
+- Initial `ultimate-agentic-workflow` skill: T0-T3 tier model, traceability
+  workflow, large-codebase readiness checker, pilot measurement protocol,
+  Codex/Claude bootloader templates.
+
+## Credits & Current Scope
+
+Patterns adapted (concepts, not copied text) from Anthropic's engineering
+guidance and the ecosystem: obra/superpowers, Ponytail, Headroom, Every's
+compound engineering, GSD, Beads, and alexknowshtml's teach/reflect skills —
+see `references/meta.md` for the full map.
+
+This repo is intentionally small. It is not a framework, daemon, or hosted
+service. It is a portable skill plus references, scripts, and tests that
+target agent behavior in other repositories.
