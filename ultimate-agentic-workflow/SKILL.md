@@ -1,6 +1,6 @@
 ---
 name: ultimate-agentic-workflow
-description: Routes AI coding work by risk tier (T0-T3) and enforces traceability, verification, and anti-slop discipline. Use when initializing or scaffolding a repo for AI coding (preflight readiness check, AGENTS.md/CLAUDE.md bootloaders, .claude starter kit with subagents/hooks/skills), checking or installing agent tooling and frameworks (ripgrep, Serena, Superpowers, GSD), classifying task ceremony, orchestrating subagents or parallel work, running goal loops or autonomous loops, managing context rot/compaction on long tasks, capturing session lessons, creating new skills or subagents, or producing accountable multi-step work with .workflow artifacts, verification ledgers, and fresh-context review.
+description: Routes AI coding work by risk tier (T0-T3) and enforces traceability, verification, and anti-slop discipline. Use when initializing or scaffolding a repo for AI coding (preflight readiness check, AGENTS.md/CLAUDE.md bootloaders, .claude starter kit with subagents/hooks/skills), migrating or upgrading a repo from a previous version of this workflow, checking or installing agent tooling and frameworks (ripgrep, Serena, Superpowers, GSD), classifying task ceremony, orchestrating subagents or parallel work, running goal loops or autonomous loops, managing context rot/compaction on long tasks, capturing session lessons, creating new skills or subagents, or producing accountable multi-step work with .workflow artifacts, verification ledgers, and fresh-context review.
 ---
 
 # Ultimate Agentic Workflow
@@ -21,7 +21,7 @@ For any repo — new or existing — start with the read-only readiness check:
 python3 <skill-dir>/scripts/preflight.py --project-root .
 ```
 
-It reports repo and bootloader state, `.claude` kit presence, tool availability (ripgrep, Serena, ast-grep, ...), and whether proven frameworks are installed (the Superpowers plugin; GSD, whose original repo is archived — successor open-gsd/gsd-core, npm `@opengsd/gsd-core`), then prints an ordered next-steps list with exact commands. It executes nothing beyond read-only listings; every install stays approval-first. Prefer installing Superpowers over reimplementing its behavior skills — this kit's hooks, gates, and verifier agents complement it, they do not replace it.
+It reports repo and bootloader state, `.claude` kit presence, tool availability (ripgrep, Serena, ast-grep, ...), and whether proven frameworks are installed (the Superpowers plugin; GSD, whose original repo is archived — successor open-gsd/gsd-core, npm `@opengsd/gsd-core`), then prints an ordered next-steps list with exact commands. It also detects repos initialized by v1 of this skill and prints the exact migration steps (`git mv AGENTS.md OPS.md`, then init with `--skip-existing`) — when asked to migrate or upgrade the workflow, run preflight and follow its output. It executes nothing beyond read-only listings; every install stays approval-first. Prefer installing Superpowers over reimplementing its behavior skills — this kit's hooks, gates, and verifier agents complement it, they do not replace it.
 
 ## Initialize Agent Files
 

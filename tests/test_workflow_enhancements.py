@@ -155,3 +155,14 @@ def test_pilot_reference_keeps_efficiency_claims_hypotheses_until_measured():
 
     for phrase in ["A/B", "baseline", "treatment", "wall-clock", "hypotheses"]:
         assert phrase in content
+
+
+def test_skill_advertises_and_routes_v1_migration():
+    content = read("ultimate-agentic-workflow/SKILL.md")
+    frontmatter = content.split("---")[1]
+
+    # Trigger vocabulary: "migrate/upgrade" requests must fire the skill.
+    assert "migrating or upgrading" in frontmatter
+    # And the body routes the agent to the mechanism that handles it.
+    assert "migration steps" in content
+    assert "git mv AGENTS.md OPS.md" in content
