@@ -23,7 +23,11 @@ SKILL_DIR = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = SKILL_DIR / "assets" / "templates"
 CLAUDE_KIT_DIR = SKILL_DIR / "assets" / "claude"
 
-CLI_CONFIG_DIRS = {"codex": "`.codex`", "claude": "`.claude`", "both": "`.codex` / `.claude`"}
+CLI_CONFIG_DIRS = {
+    "codex": "`.codex` (or your harness's config directory)",
+    "claude": "`.claude`",
+    "both": "`.codex` / `.claude` (or your harness's config directory)",
+}
 
 
 def load_json(path: Path) -> dict:

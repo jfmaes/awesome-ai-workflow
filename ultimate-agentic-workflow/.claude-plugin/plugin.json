@@ -1,0 +1,7 @@
+{
+  "name": "ultimate-agentic-workflow",
+  "description": "Tiered agentic workflow (T0-T3) with traceability, anti-slop gates, orchestration and context-engineering references, a preflight readiness check, and an installable .claude starter kit (subagents, stop-gate hooks, retro/mint-skill skills).",
+  "author": {
+    "name": "jfmaes"
+  }
+}

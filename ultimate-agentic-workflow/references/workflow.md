@@ -322,7 +322,7 @@ Create:
 Before execution, validate the run directory:
 
 ```bash
-python3 ultimate-agentic-workflow/scripts/verify_run.py --run-dir .workflow/<run-slug>
+python3 <skill-dir>/scripts/verify_run.py --run-dir .workflow/<run-slug>
 ```
 
 Failure modes: orchestration exists but does not drive actual work; `state.json` drifts from `plan.md`; results dumped without integration decisions.

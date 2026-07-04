@@ -39,7 +39,7 @@ Do not read broad files just because a search returns many hits. Narrow first, t
 When a repo looks large, unfamiliar, polyglot, or cross-file navigation heavy, run the read-only readiness check before adding tools:
 
 ```bash
-python3 ultimate-agentic-workflow/scripts/large_codebase_tools.py --project-root . --json
+python3 <skill-dir>/scripts/large_codebase_tools.py --project-root . --json
 ```
 
 The script:

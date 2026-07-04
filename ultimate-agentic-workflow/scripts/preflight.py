@@ -5,7 +5,7 @@ Read-only: inspects the repo, PATH, and Claude Code plugin/skill locations,
 then prints an ordered do-this-next list with exact commands. It never
 installs, edits config, or writes files — installs stay approval-first.
 
-    python3 ultimate-agentic-workflow/scripts/preflight.py --project-root .
+    python3 <skill-dir>/scripts/preflight.py --project-root .
 
 Safe on existing codebases: it only reports what is present and what is
 missing. The only commands it runs are read-only (`git status --porcelain`,
@@ -133,7 +133,10 @@ def detect_gsd(root: Path, home: Path) -> dict:
 
 def build_next_steps(repo: dict, tools: dict, project: dict, frameworks: dict) -> list[str]:
     steps: list[str] = []
-    init = "python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --project-root ."
+    # Reference the installed script by its real location so the printed
+    # command works from a repo clone, a skills dir, or a plugin cache alike.
+    init_script = Path(__file__).with_name("init_agents.py")
+    init = f"python3 {init_script} --cli claude --claude-kit --project-root ."
 
     if repo["bootloader_claude"] == "missing" and repo["bootloader_codex"] == "missing":
         steps.append(f"Bootstrap agent files and the .claude kit: {init}")

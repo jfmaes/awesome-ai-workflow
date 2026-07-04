@@ -3,7 +3,7 @@
 The skill ships an installable `.claude/` kit: five subagents, two Stop hooks, two skills, and a settings template. Install it into a target repo with:
 
 ```bash
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --project-root .
+python3 <skill-dir>/scripts/init_agents.py --cli claude --claude-kit --project-root .
 ```
 
 (`--claude-kit` also works with `--cli both`.) The installer copies `assets/claude/` into the target's `.claude/` directory and refuses to overwrite existing files unless `--force` is passed. Everything is optional and individually deletable.

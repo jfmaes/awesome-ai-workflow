@@ -99,15 +99,23 @@ README.md
 
 ## Quick Start (any repo, new or existing)
 
+One guided command — audits first, shows what it will create, asks before writing:
+
 ```bash
-# 1. See exactly what's present, what's missing, and what to run next (read-only):
+python3 ultimate-agentic-workflow/scripts/setup.py --project-root .        # add --yes to skip the prompt
+```
+
+Or run the pieces individually:
+
+```bash
+# Read-only audit: what's present, what's missing, what to run next:
 python3 ultimate-agentic-workflow/scripts/preflight.py --project-root .
 
-# 2. Bootstrap agent files + the .claude kit (refuses to overwrite anything):
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --project-root .
+# Bootstrap agent files + the .claude kit (refuses to overwrite anything):
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit --project-root .
 
 # Existing CLAUDE.md/AGENTS.md? Print the rendered files and merge by hand instead:
-python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --claude-kit --stdout --project-root .
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit --stdout --project-root .
 ```
 
 The preflight also checks that core tools are usable (ripgrep, Serena, ast-grep,
@@ -119,25 +127,50 @@ approval-first.
 
 ## Install The Skill
 
-For Codex, copy the skill into your Codex skills directory:
+**Claude Code (plugin — easiest).** This repo is a plugin marketplace; inside Claude Code run:
 
-```bash
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-cp -R ultimate-agentic-workflow "${CODEX_HOME:-$HOME/.codex}/skills/"
+```text
+/plugin marketplace add jfmaes/awesome-ai-workflow
+/plugin install ultimate-agentic-workflow@awesome-ai-workflow
 ```
 
-For Claude Code, copy it into a skills directory (project-local or user-level):
+**Claude Code (skills directory).** Copy it project-local or user-level:
 
 ```bash
 mkdir -p .claude/skills            # or: mkdir -p ~/.claude/skills
 cp -R ultimate-agentic-workflow .claude/skills/
 ```
 
+**Codex.** Copy it into your Codex skills directory:
+
+```bash
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
+cp -R ultimate-agentic-workflow "${CODEX_HOME:-$HOME/.codex}/skills/"
+```
+
+**Other harnesses (OpenCode, Cursor, Gemini CLI, ...).** Clone the repo anywhere and run the Quick Start scripts — see Harness Support below.
+
 Start a new agent session and invoke it, e.g.:
 
 ```text
 Use ultimate-agentic-workflow to initialize this repo for accountable AI coding.
 ```
+
+## Harness Support
+
+| Piece | Claude Code | Codex | OpenCode / Cursor / Gemini CLI / other AGENTS.md harnesses |
+| --- | --- | --- | --- |
+| References (workflow, orchestration, context-engineering, anti-slop, meta, large-codebase, pilot) | yes | yes | yes — plain markdown, point your harness at them |
+| `AGENTS.md` bootloader + `OPS.md` | yes (also reads AGENTS.md) | yes | yes — the AGENTS.md convention is the cross-harness standard |
+| `CLAUDE.md` bootloader | yes | — | — |
+| Scripts (`setup.py`, `preflight.py`, `init_agents.py`, `verify_run.py`, `large_codebase_tools.py`) | yes | yes | yes — plain Python 3, no harness dependency |
+| `.claude/` kit: subagents, Stop hooks, `/retro`, `/mint-skill` | yes | — | — (mechanisms are Claude Code's; the agent role prompts in `assets/claude/agents/` are plain markdown and port as system prompts) |
+| Plugin install | yes | — | — |
+
+The enforcement layer (hooks, stop gates, subagents) is harness-native by
+necessity; everything else — the tiers, ledgers, orchestration patterns,
+context rules, and anti-slop gates — travels with any harness that can read
+markdown and run Python.
 
 ## Initialize A Target Repo
 
