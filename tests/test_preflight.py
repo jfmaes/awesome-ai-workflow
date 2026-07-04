@@ -107,3 +107,12 @@ def test_cli_json_mode_and_nonexistent_root(tmp_path):
         capture_output=True,
     )
     assert missing.returncode != 0
+
+
+def test_generated_ops_is_recognized_as_ours(tmp_path):
+    init = load_init()
+    init.write_files(init.plan_files("claude", tmp_path, init.detect_context(tmp_path)), force=False)
+    module = load_preflight()
+    report = module.build_report(tmp_path, home=tmp_path / "fakehome")
+
+    assert report["repo"]["ops"] == "ours"
