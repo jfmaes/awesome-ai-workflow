@@ -144,3 +144,36 @@ def test_wired_stop_gate_detected_from_template_settings(tmp_path):
     report = module.build_report(tmp_path, home=tmp_path / "fakehome")
 
     assert report["repo"]["stop_gate_wired"] is True
+
+
+def test_v1_claude_layout_gets_migration_steps(tmp_path):
+    # Faithful v1 fixture: CLAUDE.md bootloader (with skill marker) and
+    # AGENTS.md in its old operational-guide role; no OPS.md.
+    (tmp_path / "CLAUDE.md").write_text(
+        "# Agent Autopilot\n\nThis repo uses the `ultimate-agentic-workflow` skill.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "AGENTS.md").write_text(
+        "# Operational Guide\n\nKeep this file under 60 lines.\n## Validation\n- Test: `pytest`\n",
+        encoding="utf-8",
+    )
+
+    module = load_preflight()
+    report = module.build_report(tmp_path, home=tmp_path / "fakehome")
+
+    assert report["repo"]["v1_claude_layout"] is True
+    steps = "\n".join(report["next_steps"])
+    assert "git mv AGENTS.md OPS.md" in steps
+    assert "--skip-existing" in steps
+    # Migration guidance replaces the generic foreign-file merge advice.
+    assert "Do not overwrite" not in steps
+
+
+def test_v2_layouts_are_not_misdetected_as_v1(tmp_path):
+    init = load_init()
+    init.write_files(init.plan_files("both", tmp_path, init.detect_context(tmp_path)), force=False)
+
+    module = load_preflight()
+    report = module.build_report(tmp_path, home=tmp_path / "fakehome")
+
+    assert report["repo"]["v1_claude_layout"] is False

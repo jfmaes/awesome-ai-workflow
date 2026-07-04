@@ -82,12 +82,27 @@ def check_repo(root: Path) -> dict:
     kit_agents_present = [
         name for name in KIT_AGENTS if (root / ".claude" / "agents" / f"{name}.md").is_file()
     ]
+    bootloader_claude = file_role(root / "CLAUDE.md")
+    bootloader_codex = file_role(root / "AGENTS.md")
+    ops = file_role(root / "OPS.md")
+    # v1 of this skill gave AGENTS.md the operational-guide role for Claude
+    # repos (v2 moved that to OPS.md). Signature: our CLAUDE.md bootloader,
+    # an AGENTS.md that reads like the old ops guide, and no OPS.md.
+    agents_md = root / "AGENTS.md"
+    v1_claude_layout = (
+        bootloader_claude == "ours"
+        and bootloader_codex == "foreign"
+        and ops == "missing"
+        and agents_md.is_file()
+        and "Operational" in agents_md.read_text(encoding="utf-8", errors="replace")
+    )
     return {
         "git_repo": git_dir,
         "git_dirty": dirty,
-        "bootloader_claude": file_role(root / "CLAUDE.md"),
-        "bootloader_codex": file_role(root / "AGENTS.md"),
-        "ops": file_role(root / "OPS.md"),
+        "bootloader_claude": bootloader_claude,
+        "bootloader_codex": bootloader_codex,
+        "ops": ops,
+        "v1_claude_layout": v1_claude_layout,
         "claude_settings": (root / ".claude" / "settings.json").is_file(),
         "kit_agents_present": kit_agents_present,
         "kit_hooks_present": (root / ".claude" / "hooks" / "stop_gate.py").is_file(),
@@ -158,7 +173,16 @@ def build_next_steps(repo: dict, tools: dict, project: dict, frameworks: dict) -
         "(drop --claude-kit for non-Claude harnesses)"
     )
 
-    if repo["bootloader_claude"] == "missing" and repo["bootloader_codex"] == "missing":
+    if repo["v1_claude_layout"]:
+        migrate_init = f"python3 {init_script} --cli both --claude-kit --skip-existing --project-root ."
+        steps.append(
+            "v1 layout detected (AGENTS.md is the old operational guide). Migrate: "
+            "1) `git mv AGENTS.md OPS.md` to give the ops content its v2 home; "
+            f"2) re-run init with --skip-existing to add the universal AGENTS.md bootloader and kit: {migrate_init}; "
+            "3) optionally diff your CLAUDE.md against the new template via --stdout and merge improvements. "
+            "Existing specs/, .workflow/, and memory-bank/ artifacts remain compatible — no changes needed."
+        )
+    elif repo["bootloader_claude"] == "missing" and repo["bootloader_codex"] == "missing":
         steps.append(f"Bootstrap agent files and the .claude kit: {init}")
     elif repo["bootloader_claude"] == "foreign" or repo["bootloader_codex"] == "foreign":
         steps.append(

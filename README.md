@@ -119,6 +119,29 @@ If you are an agent reading this: the entrypoint is `ultimate-agentic-workflow/S
 - Never claim completion without a fresh verification-ledger row. Never present self-review as independent review.
 - Run `python3 <skill-dir>/scripts/preflight.py --project-root .` before proposing setup changes; everything that installs or mutates config requires user approval with exact commands, write targets, risks, and rollback.
 
+## Migrating from v1
+
+Repos that installed the previous version of this workflow migrate in minutes, and `preflight.py` detects the v1 layout and prints these steps for you:
+
+**v1 Claude layout** (`CLAUDE.md` bootloader + `AGENTS.md` acting as the operational guide — the roles changed in v2):
+
+```bash
+git mv AGENTS.md OPS.md    # the old AGENTS.md was the ops guide; that role now lives in OPS.md
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit --skip-existing --project-root .
+# optional: diff your CLAUDE.md against the fresh template and merge improvements
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --stdout --project-root .
+```
+
+**v1 Codex layout** (`AGENTS.md` + `OPS.md`): the roles are unchanged — just add the missing pieces:
+
+```bash
+python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit --skip-existing --project-root .
+```
+
+**The skill itself**: replace the old copy in your skills directory (`~/.codex/skills/` or `.claude/skills/`) with this version, or switch to the plugin install.
+
+**Your artifacts are safe**: v2 kept the tier model, requirement/verification IDs, `.workflow/<slug>/` layout, and spec formats. Existing `specs/`, `.workflow/` runs, and `memory-bank/` content need no changes — v2 only clarified that `memory-bank` is a projection, not the canonical state. `--skip-existing` guarantees nothing you customized gets touched.
+
 ## Harness Support
 
 | Piece | Claude Code | Codex | OpenCode / Cursor / Gemini CLI / other AGENTS.md harnesses |

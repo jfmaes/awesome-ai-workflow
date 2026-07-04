@@ -63,6 +63,12 @@ def main() -> int:
     print()
 
     repo = report["repo"]
+    if repo.get("v1_claude_layout"):
+        print(
+            "v1 layout detected — nothing was written. Follow the migration step printed "
+            "above (git mv AGENTS.md OPS.md, then re-run init with --skip-existing)."
+        )
+        return 0
     if repo["bootloader_claude"] == "foreign" or repo["bootloader_codex"] == "foreign":
         print(
             "This repo already has its own CLAUDE.md/AGENTS.md — nothing was written.\n"
