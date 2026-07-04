@@ -33,6 +33,11 @@ These map onto the execution modes in `workflow.md` and the patterns in `orchest
 
 Worktree isolation for parallel implementers is the dispatcher's job: create the worktree (`git worktree add`) and name it in the packet before dispatch. The implementer's rules tell it to refuse parallel edits without one. (Frontmatter-level isolation fields are not portable across Claude Code versions, so the kit does not rely on them.)
 
+Interplay with the frameworks the preflight recommends:
+
+- **Superpowers ships skills, not subagents.** Its brainstorming/TDD/plan/subagent-driven-development skills define the *process*; these agents are the tool-restricted *workers* that process should dispatch. A skill cannot make a reviewer read-only — only a subagent's `tools` field can — so the two compose rather than compete. When Superpowers is installed, drive implementation with its subagent-driven-development skill and dispatch `implementer`/`code-reviewer`/`skeptic-verifier` as its workers.
+- **GSD (gsd-core) ships its own 12 agents**, wired to its `/gsd-*` commands and `.planning/` structure. If you adopt the full GSD workflow, its `gsd-code-reviewer`/`gsd-researcher` supersede this kit's equivalents — delete the redundant ones. `skeptic-verifier` and `test-runner` have no equivalent in either framework and are worth keeping regardless.
+
 ## Hooks
 
 Installed to `.claude/hooks/`. Both honor `stop_hook_active`, and Claude Code's built-in cap (a Stop hook is overridden after 8 consecutive blocks without progress) is the runaway backstop.
