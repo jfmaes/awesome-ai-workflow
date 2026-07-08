@@ -26,7 +26,11 @@ BOOTLOADER_MARKER = "ultimate-agentic-workflow"
 KIT_AGENTS = ["code-reviewer", "skeptic-verifier", "test-runner", "researcher", "implementer"]
 
 SUPERPOWERS_INSTALL = "/plugin install superpowers@claude-plugins-official   (inside Claude Code)"
-GSD_CORE_INSTALL = "npx @opengsd/gsd-core@latest"
+GSD_SECURITY_NOTE = (
+    "The original gsd-build/get-shit-done was archived after a token rug-pull (mid-2026); "
+    "the open-gsd/gsd-core fork is the non-tainted successor but is unproven and overlaps "
+    "UAW — evaluate before adopting, and pin any version you install."
+)
 
 
 def load_sibling(name: str):
@@ -143,7 +147,11 @@ def detect_superpowers(home: Path) -> dict:
 
 
 def detect_gsd(root: Path, home: Path) -> dict:
-    """Detect GSD (original get-shit-done or the open-gsd successor)."""
+    """Detect GSD (original get-shit-done or the open-gsd successor).
+
+    Detection only — this workflow does not recommend installing either one.
+    See GSD_SECURITY_NOTE for why.
+    """
     signals = []
     if (root / ".planning" / "config.json").is_file():
         signals.append("project .planning/config.json")
@@ -155,11 +163,7 @@ def detect_gsd(root: Path, home: Path) -> dict:
     return {
         "installed": bool(signals),
         "detected_via": ", ".join(signals) or None,
-        "install": GSD_CORE_INSTALL,
-        "note": (
-            "The original gsd-build/get-shit-done repo is archived (June 2026); "
-            "the maintained successor is open-gsd/gsd-core."
-        ),
+        "note": GSD_SECURITY_NOTE,
     }
 
 
@@ -223,11 +227,7 @@ def build_next_steps(repo: dict, tools: dict, project: dict, frameworks: dict) -
             f"subagent-driven dev): {SUPERPOWERS_INSTALL} — requires user approval."
         )
     if not frameworks["gsd"]["installed"]:
-        steps.append(
-            "Optional: GSD-style spec-driven commands via the maintained successor "
-            f"({GSD_CORE_INSTALL}) — the original repo is archived; evaluate per "
-            "pilot-measurement.md before adopting. Requires user approval."
-        )
+        steps.append(f"Ecosystem awareness only, no install recommended: {GSD_SECURITY_NOTE}")
 
     if not steps:
         steps.append(

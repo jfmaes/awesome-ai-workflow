@@ -38,7 +38,7 @@ Worktree isolation for parallel implementers is the dispatcher's job: create the
 Interplay with the frameworks the preflight recommends:
 
 - **Superpowers ships skills, not subagents.** Its brainstorming/TDD/plan/subagent-driven-development skills define the *process*; these agents are the tool-restricted *workers* that process should dispatch. A skill cannot make a reviewer read-only — only a subagent's `tools` field can — so the two compose rather than compete. When Superpowers is installed, drive implementation with its subagent-driven-development skill and dispatch `implementer`/`code-reviewer`/`skeptic-verifier` as its workers.
-- **GSD (gsd-core) ships its own large agent roster** (30+ `gsd-*` agents, including `gsd-code-reviewer` and several specialized researchers), wired to its `/gsd-*` commands and `.planning/` structure. If you adopt the full GSD workflow, its reviewer/researcher agents supersede this kit's equivalents — delete the redundant ones. `skeptic-verifier` and `test-runner` have no equivalent in either framework and are worth keeping regardless.
+- **GSD is a deliberate choice, not a default** — the original gsd-build/get-shit-done was archived after a 2026 token rug-pull; the open-gsd/gsd-core fork is untainted but unproven. Evaluate before adopting. If you do: gsd-core ships its own large agent roster (30+ `gsd-*` agents, including `gsd-code-reviewer` and several specialized researchers), wired to its `/gsd-*` commands and `.planning/` structure. Its reviewer/researcher agents supersede this kit's equivalents — delete the redundant ones. `skeptic-verifier` and `test-runner` have no equivalent in either framework and are worth keeping regardless.
 
 ## Hooks
 
