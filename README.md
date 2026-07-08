@@ -19,11 +19,11 @@ What makes v2 better:
 | **Enforcement** | Prose asking agents to verify before claiming done | A Stop-hook gate that makes stopping *impossible* while your checks fail — and a preflight that verifies the gate is actually wired, not just installed |
 | **Entrypoint** | Copy files, read a 1,100-line manual | One guided command (`setup.py`), or `/plugin install` in Claude Code; brownfield-safe with `--stdout` merge and `--skip-existing` |
 | **Traceability** | Four overlapping ledgers that could drift apart | One traceability matrix + one verification ledger, with an explicit canonical state file per tier and a `verify_run.py` gate |
-| **Subagents** | None | Five tool-restricted roles — reviewers and verifiers that *cannot* edit the code they judge — designed to compose with Superpowers and GSD, not compete |
+| **Subagents** | None | Five tool-restricted roles — reviewers and verifiers that *cannot* edit the code they judge — designed to compose with Superpowers, and with GSD's roster if adopted, not compete |
 | **Orchestration & context** | Not covered | `orchestration.md` (fan-out economics, packet contracts, model tiering, judge panels, loop stop conditions) and `context-engineering.md` (compaction survival, subagent isolation), grounded in Anthropic's primary engineering guidance |
 | **Slop** | Implicit taste | An explicit minimalism ladder with a safety carve-out, plus a slop taxonomy for code, tests, prose, and artifacts |
 | **Compounding** | Static instructions | `/retro` + `/mint-skill` + an optional learning gate: every session can leave the repo's agentic setup smarter than it found it |
-| **Ecosystem** | Isolated | Preflight detects and recommends proven frameworks (Superpowers, GSD's successor) with exact install commands; `meta.md` maps what to steal from where |
+| **Ecosystem** | Isolated | Preflight detects and recommends the proven Superpowers plugin with an exact install command, plus ecosystem awareness of GSD (evaluate before adopting, no auto-install); `meta.md` maps what to steal from where |
 | **Reach** | Codex-first, single install path | Claude Code (plugin/skill), Codex, and every AGENTS.md harness (OpenCode, Cursor, Gemini CLI); all scripts run from clone, skills dir, or plugin cache |
 | **Quality bar** | Phrase-matching tests | 64 behavioral tests; four adversarial multi-agent review rounds (50+ reviewer/skeptic agents) with every confirmed finding fixed and regression-tested |
 
@@ -40,7 +40,7 @@ Agentic coding fails in predictable ways. Each one gets a mechanism here — not
 | **Multi-agent chaos or waste** | `orchestration.md`: when fan-out pays (roughly an order of magnitude more tokens — usually worth it for discovery/review/verification, *not* authoring), sizing tables, structured packet contracts, model tiering, judge panels, loop-until-dry. |
 | **Goal loops that never terminate or terminate early** | Deterministic conditions → the stop gate. Judgment conditions → the built-in `/goal`. Batch loops → machine-checkable stop conditions, circuit breakers, budget caps. |
 | **Every session relearns the same lessons** | `/retro` mines each session for durable lessons and routes them to the right home; `/mint-skill` turns repeated workflows into new skills/subagents with tuned trigger descriptions; an optional learning gate blocks the first stop of a session once and prompts a `/retro` pass before the agent can finish. |
-| **Reinventing what the ecosystem already solved** | The preflight detects and recommends proven frameworks (Superpowers plugin, GSD's successor) with exact install commands, and `meta.md` maps the ecosystem (Ponytail, Headroom, Beads, compound engineering) so you steal ideas instead of rebuilding them. |
+| **Reinventing what the ecosystem already solved** | The preflight detects and recommends the proven Superpowers plugin with an exact install command, plus ecosystem awareness of GSD (evaluate before adopting, no auto-install), and `meta.md` maps the ecosystem (Ponytail, Headroom, Beads, compound engineering) so you steal ideas instead of rebuilding them. |
 
 Grounded, not vibes: built from Anthropic's primary engineering guidance (context engineering, the multi-agent research system, skill authoring), reviewed by adversarial multi-agent passes whose skeptic verifiers reproduced every reported bug before it was fixed, and covered by a behavioral test suite (`python3 -m pytest -q`).
 
@@ -66,11 +66,13 @@ python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit
 ```
 
 The preflight also checks that core tools are usable (ripgrep, Serena, ast-grep,
-uv) and whether proven frameworks are installed — the Superpowers plugin
-(`/plugin install superpowers@claude-plugins-official`) and GSD (original repo
-archived; successor open-gsd/gsd-core, install: `npx @opengsd/gsd-core@latest`) — and prints install
-commands for anything missing. It installs nothing itself; every install is
-approval-first.
+uv) and whether the recommended Superpowers plugin is installed
+(`/plugin install superpowers@claude-plugins-official`) — plus ecosystem
+awareness of GSD (original gsd-build/get-shit-done archived after a 2026
+token rug-pull; successor open-gsd/gsd-core is non-tainted but unproven and
+overlaps this kit — evaluate before adopting, no install command printed) —
+and prints install commands for anything missing. It installs nothing
+itself; every install is approval-first.
 
 ### What you get after setup
 
