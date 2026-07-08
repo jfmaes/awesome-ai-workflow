@@ -1,0 +1,19 @@
+# AI_RADAR.yaml — technology radar (cross-project, parallels ~/AI_RETRO.md)
+# States: assess (watch, don't act) · trial (spiking behind adapter, WIP<=3)
+#         adopt (in prod, names its ADR) · hold (rejected/frozen, names why + revisit)
+# Every entry MUST have a revisit: date-or-trigger. No revisit = a leak.
+# Managed by the evaluate-tech skill.
+
+meta:
+  trial_wip_limit: 3
+  updated: 2026-01-01
+
+entries:
+  - name: example-framework
+    state: trial
+    surface: what-it-would-replace        # e.g. "the reranker in our search stack"
+    claim: "the headline claim you're testing"
+    verdict: ""                            # filled at decide step
+    adr: docs/decisions/DEC-000-example.md # for adopt/hold
+    revisit: 2026-02-01                    # date OR trigger ("when it hits 1.0")
+    opened: 2026-01-01
