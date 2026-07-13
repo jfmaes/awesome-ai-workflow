@@ -18,6 +18,7 @@ EXPECTED_AGENTS = {
     "researcher",
     "implementer",
 }
+EXPECTED_SKILLS = {"evaluate-tech", "mint-skill", "retro"}
 
 
 def load_init_module():
@@ -78,11 +79,41 @@ def test_agent_files_have_required_frontmatter_and_safe_tools():
 
 
 def test_skills_have_valid_frontmatter():
-    skill_dirs = {p.parent.name for p in (KIT / "skills").glob("*/SKILL.md")}
-    assert skill_dirs == {"retro", "mint-skill"}
+    skill_files = {
+        path.parent.name: path
+        for path in (KIT / "skills").glob("*/SKILL.md")
+    }
+    assert set(skill_files) == EXPECTED_SKILLS
+
+    for name, path in skill_files.items():
+        fields = parse_frontmatter(path)
+        assert fields.get("name") == name
+        description = fields.get("description", "")
+        assert len(description) > 40
+        assert "Use " in description
 
     mint = parse_frontmatter(KIT / "skills" / "mint-skill" / "SKILL.md")
     assert mint.get("disable-model-invocation") == "true"
+
+    evaluate = parse_frontmatter(skill_files["evaluate-tech"])
+    assert evaluate.get("disable-model-invocation") != "true"
+    description = evaluate["description"].lower()
+    for phrase in ["adopt", "migrate", "reject", "should i switch", "tech radar"]:
+        assert phrase in description
+
+    body = skill_files["evaluate-tech"].read_text(encoding="utf-8").lower()
+    for phrase in [
+        "what would this *replace*",
+        "deep-research",
+        "using-git-worktrees",
+        "adapter/interface",
+        "your data",
+        "references/adr-template.md",
+        "~/ai_radar.yaml",
+        "revisit:",
+        "wip limit: 3",
+    ]:
+        assert phrase in body
 
 
 def test_settings_template_is_valid_json_and_wires_stop_gate():
@@ -197,7 +228,11 @@ def test_claude_kit_installs_into_dot_claude(tmp_path):
     for agent in EXPECTED_AGENTS:
         assert (tmp_path / ".claude" / "agents" / f"{agent}.md").is_file()
     assert (tmp_path / ".claude" / "hooks" / "stop_gate.py").is_file()
-    assert (tmp_path / ".claude" / "skills" / "retro" / "SKILL.md").is_file()
+    for skill in EXPECTED_SKILLS:
+        assert (tmp_path / ".claude" / "skills" / skill / "SKILL.md").is_file()
+    evaluate = tmp_path / ".claude" / "skills" / "evaluate-tech"
+    assert (evaluate / "radar-template.yaml").is_file()
+    assert (evaluate / "references" / "adr-template.md").is_file()
     # Template becomes the live settings.json when none exists.
     assert (tmp_path / ".claude" / "settings.json").is_file()
     assert not (tmp_path / ".claude" / "settings.json.template").exists()
