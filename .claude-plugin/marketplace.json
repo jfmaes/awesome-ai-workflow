@@ -6,6 +6,7 @@
   "plugins": [
     {
       "name": "ultimate-agentic-workflow",
+      "version": "0.1.0",
       "source": "./ultimate-agentic-workflow",
       "description": "Tiered agentic workflow with traceability, anti-slop gates, orchestration/context-engineering guidance, preflight readiness check, and a .claude starter kit."
     }

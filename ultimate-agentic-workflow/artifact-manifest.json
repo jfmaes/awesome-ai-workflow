@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "owner": "awesome-ai-workflow",
+  "exports": [
+    {
+      "exportName": "ultimate-agentic-workflow",
+      "exportRootRelativePath": "ultimate-agentic-workflow",
+      "harnesses": ["claude", "codex"]
+    },
+    {
+      "exportName": "evaluate-tech",
+      "exportRootRelativePath": "ultimate-agentic-workflow/assets/claude/skills/evaluate-tech",
+      "harnesses": ["claude", "codex"]
+    },
+    {
+      "exportName": "deep-research",
+      "exportRootRelativePath": "ultimate-agentic-workflow/assets/codex/skills/deep-research",
+      "harnesses": ["codex"]
+    }
+  ]
+}

@@ -97,11 +97,11 @@ mkdir -p .claude/skills            # or: mkdir -p ~/.claude/skills
 cp -R ultimate-agentic-workflow .claude/skills/
 ```
 
-**Codex.** Copy it into your Codex skills directory:
+**Codex.** Copy it into the supported user skill root:
 
 ```bash
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-cp -R ultimate-agentic-workflow "${CODEX_HOME:-$HOME/.codex}/skills/"
+mkdir -p "$HOME/.agents/skills"
+cp -R ultimate-agentic-workflow "$HOME/.agents/skills/"
 ```
 
 **Other harnesses (OpenCode, Cursor, Gemini CLI, ...).** Clone the repo anywhere and run the Quick Start scripts — see Harness Support below.
@@ -140,7 +140,10 @@ python3 ultimate-agentic-workflow/scripts/init_agents.py --cli claude --stdout -
 python3 ultimate-agentic-workflow/scripts/init_agents.py --cli both --claude-kit --skip-existing --project-root .
 ```
 
-**The skill itself**: replace the old copy in your skills directory (`~/.codex/skills/` or `.claude/skills/`) with this version, or switch to the plugin install.
+**The skill itself**: install Codex skills into `~/.agents/skills` and Claude
+skills into `.claude/skills` or `~/.claude/skills`. Keep legacy `~/.codex/skills`
+read-only during migration for rollback; do not delete it as
+part of installation. You can also switch to the plugin install.
 
 **Your artifacts are safe**: v2 kept the tier model, requirement/verification IDs, `.workflow/<slug>/` layout, and spec formats. Existing `specs/`, `.workflow/` runs, and `memory-bank/` content need no changes — v2 only clarified that `memory-bank` is a projection, not the canonical state. `--skip-existing` guarantees nothing you customized gets touched.
 

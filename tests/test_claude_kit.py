@@ -79,7 +79,7 @@ def test_agent_files_have_required_frontmatter_and_safe_tools():
 
 def test_skills_have_valid_frontmatter():
     skill_dirs = {p.parent.name for p in (KIT / "skills").glob("*/SKILL.md")}
-    assert skill_dirs == {"retro", "mint-skill"}
+    assert skill_dirs == {"retro", "mint-skill", "evaluate-tech"}
 
     mint = parse_frontmatter(KIT / "skills" / "mint-skill" / "SKILL.md")
     assert mint.get("disable-model-invocation") == "true"

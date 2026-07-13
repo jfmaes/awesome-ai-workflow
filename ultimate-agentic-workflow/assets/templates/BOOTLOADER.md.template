@@ -2,6 +2,9 @@
 
 This repo uses the `ultimate-agentic-workflow` skill for non-trivial AI coding work.
 
+Git repositories own authored capability bodies; vendor managers own plugin
+payloads. Installed harness homes are deployment targets, not canonical sources.
+
 ## Project
 
 - Name: {project_name}
@@ -30,11 +33,13 @@ Use `ultimate-agentic-workflow` for T2/T3 work, repo initialization, traceabilit
 Rules that apply at every tier:
 
 - Keep live task state in a durable file, not only in conversation; it must survive context compaction.
-- Do not claim completion without fresh verification evidence.
+- Do not claim completion without fresh verification evidence from the current worktree.
 - For T2+ work, prefer review from a fresh context over self-review.
 
 ## Permissioned Setup
 
-Before installing dependencies, editing {config_dir}, cloning GitHub repos, or writing outside the workspace, ask for user approval with exact commands, target paths, network/data risks, and rollback.
+Before installing dependencies, editing {config_dir}, cloning GitHub repos, or writing outside the workspace, ask for fresh explicit user approval with exact commands, target paths, network/data risks, and rollback.
 
-Keep this file short. Operational notes belong in `{ops_file}`; active task status belongs in the plan or `.workflow/`.
+Every standing section must justify stable authority, safety, routing, or
+verification value. Operational notes belong in `{ops_file}`; active task status
+belongs in the plan or `.workflow/`.

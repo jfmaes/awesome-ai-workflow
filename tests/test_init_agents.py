@@ -36,6 +36,30 @@ def test_template_placeholders_match_detect_context_contract():
     assert template_placeholders("BOOTLOADER.md.template") <= context_keys | bootloader_extra
 
 
+def test_rendered_bootloader_is_portable_and_contains_only_repo_scope_policy(tmp_path):
+    module = load_module()
+    module.write_files(
+        module.plan_files("codex", tmp_path, module.detect_context(tmp_path)),
+        force=False,
+    )
+    bootloader = (tmp_path / "AGENTS.md").read_text(encoding="utf-8")
+    assert "canonical sources" in bootloader
+    assert "fresh explicit" in bootloader
+    assert "verification evidence" in bootloader
+    assert ".workflow/" in bootloader
+    for founder_only in ("RAGNAROK", "orsub", "projects-registry-gen"):
+        assert founder_only not in bootloader
+    assert "under 40" not in bootloader and "under 60" not in bootloader
+
+
+def test_ops_template_owns_procedures_and_live_state_boundaries():
+    ops = (TEMPLATE_DIR / "OPS.md.template").read_text(encoding="utf-8")
+    assert "standing context" in ops
+    assert "live status" in ops
+    assert "fresh explicit approval" in ops
+    assert "Keep this file under" not in ops
+
+
 def test_codex_init_writes_agents_and_ops(tmp_path):
     module = load_module()
     module.write_files(module.plan_files("codex", tmp_path, module.detect_context(tmp_path)), force=False)
