@@ -1,9 +1,13 @@
 ---
 name: ultimate-agentic-workflow
-description: Routes AI coding work by risk tier (T0-T3) and enforces traceability, verification, and anti-slop discipline. Use when initializing or scaffolding a repo for AI coding (preflight readiness check, AGENTS.md/CLAUDE.md bootloaders, .claude starter kit with subagents/hooks/skills), migrating or upgrading a repo from a previous version of this workflow, checking or installing agent tooling (ripgrep, Serena, Superpowers) and reviewing ecosystem frameworks like GSD, classifying task ceremony, orchestrating subagents or parallel work, running goal loops or autonomous loops, managing context rot/compaction on long tasks, capturing session lessons, creating new skills or subagents, or producing accountable multi-step work with .workflow artifacts, verification ledgers, and fresh-context review.
+description: Use when scaffolding or initializing a repo for AI coding, migrating or upgrading this workflow, orchestrating subagents or multi-session runs, or when accountable multi-step delivery needs specs, risk gates, and verification ledgers. Not for questions or small edits.
 ---
 
 # Ultimate Agentic Workflow
+
+## Fast Path (T0/T1)
+
+If the work is a question or a small, reversible, single-slice change — no new subsystem, no migration, no multi-session state — skip this skill's machinery entirely: inspect, act, verify if claiming done, answer. No spec, no plan document, no fresh-context review, no durable note. When in doubt between T1 and T2, ask one question or default to T1 and escalate if it grows.
 
 ## Overview
 
@@ -51,7 +55,7 @@ It checks every target path first and refuses to overwrite unless `--force` is g
 Classify before acting:
 
 - **T0:** answer or tiny safe edit directly
-- **T1:** write a one-line durable goal note, execute, verify
+- **T1:** inspect, act, verify; jot a one-line goal note only if the work could span a compaction
 - **T2:** write spec/plan before implementation
 - **T3:** create full traceability workflow with `.workflow/`, risk gates, verification ledger, review, reflection, and archive
 
