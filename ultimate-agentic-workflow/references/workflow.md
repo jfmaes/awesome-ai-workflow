@@ -206,7 +206,7 @@ Mechanics: `superpowers:finishing-a-development-branch` — keep, PR, merge, che
 
 - Requirement coverage audit and verification ledger complete; reviews complete or dispositions recorded.
 - Reflection and archive complete (T3); git status inspected; external-action approval obtained if needed.
-- If this work executed a plan document: close it now — `plan-close <plan> --status complete --commit` (or `plan-supersede <old> --by <new>` when a new plan replaces it). A finished task with an open plan file is not finished.
+- If this work executed a plan document: close it now — `plan-close <plan> --status complete --commit` (or `plan-supersede <old> --by <new> --commit` when a new plan replaces it). A finished task with an open plan file is not finished.
 
 ## Requirement Traceability Matrix
 
